@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block nav %}<li class="nav-item"><a class="nav-link bold">{{ username }}</a></li>{% endblock %}
+{% block title %}Edit{% endblock %}
+
+{% block main %}
+    <h1>Add Wimit</h1>
+    <div class="table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Why we meet</th>
+                    <th>Place</th>
+                    <th>Members allowed</th>
+                    <th>Min</th>
+                    <th>Max</th>
+                    <th>Date option</th>
+                    <th>Hour 1</th>
+                    <th>Hour 2</th>
+                    <th>Hour 3</th>
+                    <th>I bring my ball</th>
+                    <th>Changing hours will reset members</th>
+                </tr>
+            </thead>
+
+            <tbody class="table-group-divider">
+                <form action="/edited" method="post">
+                    <tr>
+                        <td>
+                            <select name="activity" >
+                                {% for each in activities %}
+                                    {% if cur["activity"] == each %}
+                                        <option value="{{each}}" selected> {{ each }} </option>
+                                    {% else %}
+                                        <option value="{{each}}"> {{ each }} </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" name="place" value="{{cur['place']}}">
+                        </td>
+                        <td>
+                            <select name="allowed">
+                                {% if cur["allowed"] == 'public' %}
+                                    <option selected value="public">Public</option>
+                                    <option value="private">Private</option>
+                                {% else %}
+                                    <option value="public">Public</option>
+                                    <option selected value="private">Private</option>
+                                {% endif %}
+                            </select>
+                        </td>
+                        <td class="mm">
+                            <input class="minmax" name="min" type="number" min="1" value="{{cur['min']}}">
+                        </td>
+                        <td class="mm">
+                            <input class="minmax" name="max" type="number" max="50" value="{{cur['max']}}">
+                        </td>
+                        <td>
+                            <input type="date" name="date" min="{{today}}" value="{{cur['date']}}">
+                            
+                        </td>
+                        <td>
+                            <input type="time" name="time_1" id="time_1" value="{{cur['hour_1']}}">
+                        </td>
+                        <td>
+                            <input type="time" name="time_2" id="time_2" value="{{cur['hour_2']}}">
+                        </td>
+                        <td>
+                            <input type="time" name="time_3" id="time_3" value="{{cur['hour_3']}}">
+                        </td>
+                        <td>
+                            <input type="checkbox" name="i_bring" value="{{cur['i_bring']}}">
+                        </td>
+                        <td>
+                            <button class="btn btn-primary create" type="submit" name="change_settings" value="{{cur['id']}}">Change settings</button>
+                        </td>
+                    </tr>
+                </form>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

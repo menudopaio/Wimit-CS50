@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+{% block nav %}<li class="nav-item"><a class="nav-link bold">{{ username }}</a></li>{% endblock %}
+{% block links %}
+    <script type="text/javascript">
+    
+    function changeFunc() {
+        var selectBox = document.getElementById("filtered");
+        var selectedValue = selectBox.options[selectBox.selectedIndex].value;
+
+        window.location = '/home-filters?filtered=' + selectedValue;
+    }
+    </script>
+{% endblock %}
+
+{% block title %}{{title}}{% endblock %}
+
+
+{% block main %}
+    <div class="flex-container">
+        <div class="caja top_dropdown_home">
+            <label for="filtered" class="bold move_left">Filter by:</label>
+            <select name="filtered" id="filtered" onchange="changeFunc();">
+                <option disable selected>Activity</option>
+                {% for each in activities %}
+                    <option value="{{each}}" id="{{each}}"> {{ each }} </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="caja title">
+            {% if title %}
+                <h1>{{title}}</h1>
+            {% else %}
+                <h1>Wim!t board</h1>
+            {% endif %}
+        </div>
+        <div class="caja top_justify"></div>
+    </div>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="double_bold">Activity</th>
+                <th class="double_bold">Creator</th>
+                <th class="double_bold">Place</th>
+                <th class="double_bold">Allowed</th>
+                <th class="double_bold">Date</th>
+                <th class="double_bold">Hour 1</th>
+                <th class="double_bold">Hour 2</th>
+                <th class="double_bold">Hour 3</th>
+                <th class="double_bold">Members now</th>
+                <th class="double_bold">Let's see!</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <form action="/addwimit">
+                    <button class="left btn btn-primary" type="submit">Add wim!t</button>
+                </form>
+            </tr>
+            {% for each in user_activities2 %}
+                {% if loop.index0 % 2 == 0 %}
+                    <tr class="table table-primary">
+                {% else %}
+                    <tr class="table table-secondary">
+                {% endif %}
+                    <td class="bold"> {{ each["activity"] }} </td>
+                    <td class="bold"> {{ usernames[loop.index0]['username'] }} </td>
+                    <td> {{ each["place"] }} </td>
+                    <td> {{ each["allowed"] }} </td>
+                    <td> {{ each["date"] }} </td>
+                    <td> {{ each["hour_1"] }} </td>
+                    {% if each["hour_2"] %}
+                        <td> {{ each["hour_2"] }} </td>
+                    {% else %}
+                        <td> --- </td>
+                    {% endif %}
+                    {% if each["hour_3"] %}
+                        <td> {{ each["hour_3"] }} </td>
+                    {% else %}
+                        <td> --- </td>
+                    {% endif %}
+                    <td> {{ each["n_members"] }} / {{ each["max"] }} </td>
+                    <form action="/check" method="get">
+                        <td><button class="btn btn-primary" value="{{ each['id'] }}" name="get_id" type="submit">Check</button></td>
+                    </form>
+                </tr>
+            {% endfor %}
+            {% for each in user_activities %}
+                {% if loop.index0 % 2 == 0 %}
+                    <tr class="table table-primary">
+                {% else %}
+                    <tr class="table table-secondary">
+                {% endif %}
+                    <td class="bold"> {{ each["activity"] }} </td>
+                    <td class="bold"> {{ usernames[loop.index0]['username'] }} </td>
+                    <td> {{ each["place"] }} </td>
+                    <td> {{ each["allowed"] }} </td>
+                    <td> {{ each["date"] }} </td>
+                    <td> {{ each["hour_1"] }} </td>
+                    {% if each["hour_2"] %}
+                        <td> {{ each["hour_2"] }} </td>
+                    {% else %}
+                        <td> --- </td>
+                    {% endif %}
+                    {% if each["hour_3"] %}
+                        <td> {{ each["hour_3"] }} </td>
+                    {% else %}
+                        <td> --- </td>
+                    {% endif %}
+                    <td> {{ each["n_members"] }} / {{ each["max"] }} </td>
+                    <form action="/check" method="get">
+                        <td><button class="btn btn-primary" value="{{ each['id'] }}" name="get_id" type="submit">Check</button></td>
+                    </form>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %} 

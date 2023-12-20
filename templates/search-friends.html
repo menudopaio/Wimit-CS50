@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% block nav %}<li class="nav-item"><a class="nav-link bold">{{ username }}</a></li>{% endblock %}
+{% block title %}Search Friends{% endblock %}
+
+{% block main %}
+
+    <h1>SEARCH FRIENDS</h1>
+    <p></p>
+    <form action="/search-friend" method="post">
+        <input type="text" autofocus name="friends">
+        <button type="submit" class="btn btn-primary search" name="search_friend">SearchF</button>
+    </form>
+    <p></p>
+    <table>
+        <thead>
+            <tr>
+                <th>User 1</th>
+                <th>User 2</th>
+                <th>Friend request date</th>
+                <th>Status</th>
+                <th></th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            {% for each in friend_pending %}
+                <tr>
+                    <td>  </td>
+                    <td> {{ usernames2[loop.index0]['username'] }} </td>
+                    <td> {{ each['friends_since'] }} </td>
+                    <td> {{ each['status'] }} </td>
+                    <td>
+                        {% if each['status'] == 'Pending' %}
+                            <form action="/accept-reject" method="post">
+                                <button type="submit" class="btn btn-primary search" name="accept_friend" value="{{each['id']}}">Accepte</button>
+                                <button type="submit" class="btn btn-primary red_btn" name="reject_friend" value="{{each['id']}}">Rejecte</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            {% for ouch in friends2 %}
+                <tr>
+                    <td> {{ ouch['username'] }} </td>
+                    <td> {{ ouch['friends_since'] }} </td>
+                    <td> {{ ouch['status'] }} {{ ouch['id']}}</td>
+                    <td></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

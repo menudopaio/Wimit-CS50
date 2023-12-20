@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+{% block nav %}<li class="nav-item"><a class="nav-link bold">{{ username }}</a></li>{% endblock %}
+{% block links %}
+    <script type="text/javascript">
+
+    function mostrarInput() {
+        var actividadesDropdown = document.getElementById('activity');
+        var otrosInput = document.getElementById('otrosInput');
+
+        if (actividadesDropdown.value === 'Others') {
+            otrosInput.style.display = 'block';
+        } else {
+            otrosInput.style.display = 'none';
+        }
+    }
+    </script>
+{% endblock %}
+{% block title %}Add Wim!t{% endblock %}
+
+{% block main %}
+    <h1>Add Wimit</h1>
+    <div id="table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Why we meet</th>
+                    <th>Members allowed</th>
+                    <th>Place</th>
+                    <th>Min</th>
+                    <th>Max</th>
+                    <th>Date option</th>
+                    <th>Hour 1</th>
+                    <th>Hour 2</th>
+                    <th>Hour 3</th>
+                    <th>I bring my ball</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody class="table-group-divider">
+                <form action="/addwimit" method="post">
+                    <tr>
+                        <td>
+                            <select name="activity" id="activity" onchange="mostrarInput();">
+                                <option disable selected>Activity</option>
+                                {% for each in activities %}
+                                    {% if redirect_nav == each %}
+                                        <option value="{{each}}" id="{{each}}" selected> {{ each }} </option>
+                                    {% else %}
+                                        <option value="{{each}}"> {{ each }} </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            <div id="otrosInput">
+                                <label for="otros">Escribe la actividad:</label>
+                                <input type="text" id="otros" name="otros">
+                            </div>
+                        </td>
+                        <td>
+                            <select name="allowed">
+                                <option selected value="public">Public</option>
+                                <option value="private">Private</option>
+                            </select>
+                        </td>
+                        <td><input type="text" name="place" placeholder="Place" autocomplete="off"></td>
+                        <td class="mm">
+                            <input class="minmax" name="min" type="number" min="1" value="1">
+                        </td>
+                        <td class="mm">
+                            <input class="minmax" name="max" type="number" max="50" value="50">
+                        </td>
+                        <td>
+                            <input type="date" name="date" min="{{today}}" value="{{today}}">
+                            
+                        </td>
+                        {% for i in range(1, 4) %}
+                        <td>
+                            <input type="time" name="time_{{i}}" id="time_{{i}}" value="on">
+                        </td>
+                        {% endfor %}
+                        <td>
+                            <input type="checkbox" name="i_bring" value="1">
+                        </td>
+                        <td>
+                            <button class="btn btn-primary create" type="submit">Create</button>
+                        </td>
+                    </tr>
+                </form>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

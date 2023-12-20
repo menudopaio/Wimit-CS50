@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% block nav %}<li class="nav-item"><a class="nav-link bold">{{ username }}</a></li>{% endblock %}
+{% block title %}{{a["activity"]}}{% endblock %}
+
+
+{% block main %}
+    <h1>{{a["activity"]}}</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Why we meet</th>
+                <th>Place</th>
+                <th>Members allowed</th>
+                <th>Min</th>
+                <th>Max</th>
+                <th>Date option</th>
+                <th>{{a["hour_1"]}}</th>
+                {% if a["hour_2"] %}
+                    <th>{{a["hour_2"]}}</th>
+                    {% if a["hour_3"] %}
+                        <th>{{a["hour_3"]}}</th>
+                    {% endif %}
+                {% endif %}
+                <th>Do we have a ball?</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td> {{ a["activity"] }} </td>
+                <td> {{ a["place"] }} </td>
+                <td> {{ a["allowed"] }} </td>
+                <td> {{ a["min"] }} </td>
+                <td> {{ a["max"] }} </td>
+                <td> {{ a["date"] }} </td>
+                <form action="/current" method="post">
+                    <td> <input type="checkbox" id="{{a['hour_1']}}" name="hour_1"> </td>
+                    {% if a["hour_2"] %}
+                        <td> <input type="checkbox" id="{{a['hour_2']}}" name="hour_2"> </td>
+                        {% if a["hour_3"] %}
+                            <td> <input type="checkbox" id="{{a['hour_3']}}" name="hour_3"> </td>
+                        {% endif %}
+                    {% endif %}
+                    {% if a["i_bring"] == 0 %}
+                        <td> No </td>
+                    {% else %}
+                        <td> Yes </td>
+                    {% endif %}
+                    {% if (a["max"] > a["n_members"]) and (enrolled == false) %}
+                        <td> <button class="btn btn-primary" name="enroll_btn" value="{{a['id']}}" type="submit">Enroll</button></td>
+                    {% endif %}
+                </form>
+                {% if a["creator_id"] == session["user_id"] %}
+                    <td><form action="/edit" method="post"><button class="btn btn-primary" name="edit_btn" value="{{a['id']}}" type="submit">Edit</button></form></td>
+                {% endif %}
+            </tr>
+        </tbodt>
+    </table>
+{% endblock %}
