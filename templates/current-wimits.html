@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block nav %}<li class="nav-item"><a class="nav-link bold">{{ username }}</a></li>{% endblock %}
+{% block title %}You enrolled at {{cur["activity"]}}{% endblock %}
+
+
+{% block main %}
+
+    <h1>{{cur["activity"]}}</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Activity</th>
+                <th>Allowed</th>
+                <th>Date</th>
+                <th>Max members</th>
+                <th>Current members</th>
+                <th>Let's see!</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td> {{ cur["activity"] }} </td>
+                <td> {{ cur["allowed"] }} </td>
+                <td> {{ cur["date"] }} </td>
+                <td> {{ cur["max"] }} </td>
+                <td> {{ cur["n_members"] }} </td>
+                <!-- Check details could go to /check_details for only members view -->
+                <form action="/check" method="get">
+                    <td><button class="btn btn-primary" name="get_id" value="{{cur['id']}}" type="submit">Check details</button></td>
+                </form>
+            </tr>
+        </tbody>
+    </table>
+    
+{% endblock %}

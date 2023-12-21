@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block nav %}<li class="nav-item"><a class="nav-link bold">{{ username }}</a></li>{% endblock %}
+{% block title %}Friends{% endblock %}
+
+{% block main %}
+
+    <h1>FRIENDS</h1>
+    <p></p>
+    <form action="/search-friend" method="post">
+        <input type="text" autofocus name="friends">
+        <button type="submit" class="btn btn-primary search">Add Friend</button>
+    </form>
+    <p></p>
+    <table>
+        <thead>
+            <tr>
+                <th>User Id</th>
+                <th>Username</th>
+                <th>Friend request date</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for each in friends %}
+                    {% if each['status'] == 'Pending' %}
+                        <tr>
+                            <td> {{ each['user1_id'] }}</td>
+                            <td> {{ each['username'] }} </td>
+                            <td> {{ each['friends_since'] }} </td>
+                            <td> {{ each['status'] }}</td>
+                            <td>
+                                <form action="/accept-reject" method="post">
+                                    <button type="submit" class="btn btn-primary search" name="accept_friend" value="{{each['id']}}">Accept</button>
+                                    <button type="submit" class="btn btn-primary red_btn" name="reject_friend" value="{{each['id']}}">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td> {{ each['user1_id'] }} </td>
+                            <td> {{ each['username'] }} </td>
+                            <td> {{ each['friends_since'] }} </td>
+                            <td> {{ each['status'] }}</td>
+                        </tr>
+                    {% endif %}
+            {% endfor %}
+            {% for each in friends2 %}
+                {% if each['status'] != 'Pending' %}
+                    <tr>
+                        <td> {{ each['user2_id'] }}</td>
+                        <td> {{ each['username'] }} </td>
+                        <td> {{ each['friends_since'] }} </td>
+                        <td> {{ each['status'] }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td> {{ each['user2_id'] }} </td>
+                        <td> {{ each['username'] }} </td>
+                        <td> {{ each['friends_since'] }} </td>
+                        <td> {{ each['status'] }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
