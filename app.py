@@ -283,7 +283,8 @@ def check():
             x = separacion_factor * 0.35 * np.cos(angle * (3.14159 / 180))
             y = separacion_factor * 0.35 * np.sin(angle * (3.14159 / 180))
             ax.text(x, y, str(valor), ha='center', va='center', fontsize=tamano_fuente)
-
+            texts[2].set_position((texts[2].get_position()[0] - 0.06, texts[2].get_position()[1]))
+            texts[2].set_position((texts[2].get_position()[0], texts[2].get_position()[1] + 0.075))
 
         # Configurar el fondo transparente
         fig.patch.set_alpha(0.0)
