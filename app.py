@@ -300,12 +300,6 @@ def check():
 
         # Imprimir el código HTML con la imagen base64
         html_code = f'<img src="data:image/png;base64,{imagen_base64}" alt="Gráfico Circular">'
-
-        
-
-
-
-
         
         return render_template("check_details.html", chosen=chosen, html_code=html_code, image_link=image_link, a=user_wimits, enrolled=True, hr1=pr1, hr2=pr2, hr3=pr3, cur_mem=cur_mem)
 
@@ -330,11 +324,9 @@ def addwimit():
         hour_2 = request.form.get("time_2")
         hour_3 = request.form.get("time_3")
 
-
-        check_wimit_errors(now, today, activity, ACTIVITIES, allowed, dates, hour_1, hour_2, hour_3, place)
-        """ # Check if all parameters are in the correct data type
+        # Check if all parameters are in the correct data type
         if (activity not in ACTIVITIES):
-            return render_template("error.html", message="Activity not allowed.")
+            return render_template("error.html", message="You must select a valid activity.")
         if (not allowed):
             return render_template("error.html", message="Public or Private.")
         if (dates < today.strftime("%Y-%m-%d")):
@@ -348,7 +340,7 @@ def addwimit():
         if ((hour_1 == hour_2) or (hour_2 == hour_3) or (hour_1 == hour_3)) and (hour_2 or hour_3):
             return render_template("error.html", message="Hour options must be different.")
         if (not place):
-            return render_template("error.html", message="Must meet at some place.") """
+            return render_template("error.html", message="Must meet at some place.")
         
         # Create event in the database
         try:
