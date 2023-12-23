@@ -100,33 +100,11 @@
                 </tr>
             </tbody>
         </table>
-        {% if a['n_members'] >= a['min'] %}
-        <!-- 
-        <table class="table table-bordered tt final_table">
-            <thead>
-                <tr>
-                    <th>Final Place</th>
-                    <th>Final Date</th>
-                    {% set chosen_length = chosen|length %}
-                    {% for each in range(0, chosen_length) %}
-                        <th>Final Time {{each+1}}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td> {{ a["place"] }} </td>
-                    <td> {{ a["date"] }} </td>
-                    {% for _ in range(0, chosen_length) %}
-                        <td> {{ chosen[_] }} </td>
-                    {% endfor %}
-                </tr>
-            </tbody>
-        </table>
-    -->
         <div class="imagen-container">
             {{ html_code | safe }}
         </div>
+        {% if a['n_members'] >= a['min'] %}
+        
         {% else %}
         <h2 class="table table-bordered tt final_table">Not enough members to decide final time and place.</h2>
         {% endif %}
