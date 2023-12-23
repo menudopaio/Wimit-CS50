@@ -101,6 +101,7 @@
             </tbody>
         </table>
         {% if a['n_members'] >= a['min'] %}
+        <!-- 
         <table class="table table-bordered tt final_table">
             <thead>
                 <tr>
@@ -122,6 +123,10 @@
                 </tr>
             </tbody>
         </table>
+    -->
+        <div class="imagen-container">
+            {{ html_code | safe }}
+        </div>
         {% else %}
         <h2 class="table table-bordered tt final_table">Not enough members to decide final time and place.</h2>
         {% endif %}

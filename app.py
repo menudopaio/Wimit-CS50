@@ -247,7 +247,69 @@ def check():
         
         cur_mem = db.execute("SELECT * FROM wimit_members WHERE wimit_id = ? AND member_id = ?", activity_id, session["user_id"])
         cur_mem = cur_mem[0]
-        return render_template("check_details.html", chosen=chosen, image_link=image_link, a=user_wimits, enrolled=True, hr1=pr1, hr2=pr2, hr3=pr3, cur_mem=cur_mem)
+        
+        import matplotlib.pyplot as plt
+        import numpy as np
+        from io import BytesIO
+        import base64
+
+        # Datos: hours = [pr1, pr2, pr3], etiquetas = [user_wimits["hour_1"], user_wimits["hour_2"], user_wimits["hour_3"]], colores = ['green', 'cian', 'magenta']
+
+        etiquetas = [user_wimits["hour_1"], user_wimits["hour_2"], user_wimits["hour_3"]]
+        # Verde, azul, rojo
+        colores = ['#00FF00', '#0090FF', '#FF4500']
+
+        # Especifica una fuente alternativa (por ejemplo, Arial)
+        plt.rcParams['font.family'] = 'Arial'
+
+        # Tamaño fuente texto grafico
+        tamano_fuente = 15
+
+        # Crear el gráfico circular con fondo transparente
+        fig, ax = plt.subplots(figsize=(3, 3))
+        wedges, texts = ax.pie(hours, labels=etiquetas, colors=colores, startangle=90, textprops={'fontsize': tamano_fuente})
+
+        # Agregar un círculo para formar el donut
+        centro_circulo = plt.Circle((0, 0), 0.35, fc='white')
+        fig.gca().add_artist(centro_circulo)
+
+
+        # Ajustar la separación de las etiquetas numéricas del centro del gráfico
+        separacion_factor = 1.75  # Puedes ajustar este valor según tus preferencias
+
+        # Agregar etiquetas numéricas
+        for i, (etiqueta, valor) in enumerate(zip(etiquetas, hours)):
+            angle = (wedges[i].theta2 - wedges[i].theta1) / 2 + wedges[i].theta1
+            x = separacion_factor * 0.35 * np.cos(angle * (3.14159 / 180))
+            y = separacion_factor * 0.35 * np.sin(angle * (3.14159 / 180))
+            ax.text(x, y, str(valor), ha='center', va='center', fontsize=tamano_fuente)
+
+
+        # Configurar el fondo transparente
+        fig.patch.set_alpha(0.0)
+
+        # Ajustar aspecto para que se vea como un círculo
+        plt.axis('equal')
+
+        # Añadir un título
+        plt.title('Chosen schedule', fontsize=tamano_fuente+1)
+
+        # Convertir la imagen a formato base64
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png', transparent=True)
+        buffer.seek(0)
+        imagen_base64 = base64.b64encode(buffer.read()).decode('utf-8')
+
+        # Imprimir el código HTML con la imagen base64
+        html_code = f'<img src="data:image/png;base64,{imagen_base64}" alt="Gráfico Circular">'
+
+        
+
+
+
+
+        
+        return render_template("check_details.html", chosen=chosen, html_code=html_code, image_link=image_link, a=user_wimits, enrolled=True, hr1=pr1, hr2=pr2, hr3=pr3, cur_mem=cur_mem)
 
 # ADD WIMIT ROUTE
 @app.route("/addwimit", methods=["POST", "GET"])

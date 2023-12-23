@@ -1,3 +1,11 @@
+/* Estilos CSS para posicionar la imagen */
+.imagen-container {
+    position: absolute; /* Puedes usar 'relative' en lugar de 'absolute' según tus necesidades */
+    top: 300px;         /* Ajusta la posición vertical */
+    left: 800px;        /* Ajusta la posición horizontal */
+    /* Otros estilos según tus necesidades */
+}
+
 /* Size for brand */
 #otrosInput {
     display: none;
@@ -73,7 +81,7 @@ table .left
 
 .tt
 {
-    color:white;
+    color:green;
 }
 
 .red_btn
