@@ -151,38 +151,50 @@ def logout():
 # HOME PAGE
 @app.route("/")
 def home():
+
     # Set today
     today = date.today()
     
+    # Set image
+    image_link = "static/img/sunrise.jpg"
+
     # If logged in: user; else: Guest
     if session.get("user_id") is None:
         session["user_id"] = 0
-    
-    usr_data = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])
-    usr_data = usr_data[0]
-    
-    
-    # Select public and private own activities
-    # Set image and render home page
-    image_link = "static/img/sunrise.jpg"
-    public_wimits = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public' OR (allowed = 'private' AND creator_id = ?)) AND n_members <= max AND date >= ? ORDER BY date, hour_1", session['user_id'], today)
-    usernames = db.execute("SELECT username FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE ((allowed = 'public') OR (allowed = 'private' AND creator_id = ?)) AND n_members <= max AND date >= ? ORDER BY date, hour_1", session['user_id'], today)
-    
-    username = db.execute("SELECT username FROM users WHERE id = ?", session['user_id'])
-    username = username[0]['username']
-    return render_template("home.html", username=username, user_activities=public_wimits, usernames=usernames, activities=ACTIVITIES, image_link=image_link)
 
-    usernames2 = db.execute("SELECT username FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE (allowed = 'private') AND n_members <= max AND date >= ? ORDER BY date, hour_1", today)
-    private_as_u2 = db.execute("SELECT * fROM add_wimit JOIN friend_request ON add_wimit.creator_id = friend_request.user1_id WHERE friend_request.user2_id = ? AND date >= ?", session['user_id'], today)
-    private_as_u1 = db.execute("SELECT * fROM add_wimit JOIN friend_request ON add_wimit.creator_id = friend_request.user2_id WHERE friend_request.user1_id = ? AND date >= ?", session['user_id'], today)
-    for each in private_as_u1:
-        print('U1:', each,'\n')
-    if private_as_u1 or private_as_u2:
-        return render_template("homee.html", activities=ACTIVITIES, usernames=usernames, user_activities2=private_as_u2, image_link=image_link)
-    else:
-        return render_template("login.html")
-        
-       
+    # Get username
+    username = db.execute("SELECT * FROM users WHERE id = ?", session['user_id'])
+    username = username[0]['username']
+
+    # ---------------------
+    # Select private_activities created by user
+    user_private_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'private') AND (creator_id = ?) AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
+
+    # Select public activities created by user
+    user_public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND (creator_id = ?) AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
+
+    # Select private activities created by friends
+    friends_private_activities = db.execute("SELECT * FROM add_wimit JOIN friends ON add_wimit.creator_id = friends.friend_id WHERE friends.user_id = ? AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
+    fpa_usernames = db.execute("SELECT * FROM users JOIN friends ON users.id = friends.friend_id JOIN add_wimit ON friends.friend_id = add_wimit.creator_id WHERE friends.user_id = ? AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
+    
+
+    # Select public activities 
+    public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND creator_id != ? AND (n_members < max) AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
+    pa_usernames = db.execute("SELECT * FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE allowed = 'public' AND creator_id != ? AND n_members < max AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
+
+
+    return render_template("home.html", username=username, user_private_activities=user_private_activities, user_public_activities=user_public_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, activities=ACTIVITIES, image_link=image_link)
+    
+    # ---------------------
+    # Select public and private own activities
+    user_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public' OR (allowed = 'private' AND creator_id = ?)) AND n_members <= max AND date >= ? ORDER BY date, hour_1", session['user_id'], today)
+    
+    
+
+    return render_template("home.html", username=username, user_activities=user_activities, usernames=usernames, activities=ACTIVITIES, image_link=image_link)
+    
+    # -----------------------
+
 # MY WIM!TS PAGE
 @app.route("/mywimits")
 def mywimits():

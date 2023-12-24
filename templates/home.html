@@ -57,62 +57,129 @@
                     <button class="left btn btn-primary" type="submit">Add wim!t</button>
                 </form>
             </tr>
-            {% for each in user_activities2 %}
-                {% if loop.index0 % 2 == 0 %}
-                    <tr class="table table-primary">
-                {% else %}
-                    <tr class="table table-secondary">
-                {% endif %}
-                    <td class="bold"> {{ each["activity"] }} </td>
-                    <td class="bold"> {{ usernames[loop.index0]['username'] }} </td>
-                    <td> {{ each["place"] }} </td>
-                    <td> {{ each["allowed"] }} </td>
-                    <td> {{ each["date"] }} </td>
-                    <td> {{ each["hour_1"] }} </td>
-                    {% if each["hour_2"] %}
-                        <td> {{ each["hour_2"] }} </td>
+            {% if user_private_activities | length > 0 %}
+                {% for each in user_private_activities %}
+                    {% if loop.index0 % 2 == 0 %}
+                        <tr class="table table-primary">
                     {% else %}
-                        <td> --- </td>
+                        <tr class="table table-secondary">
                     {% endif %}
-                    {% if each["hour_3"] %}
-                        <td> {{ each["hour_3"] }} </td>
+                        <td class="bold"> {{ each["activity"] }} </td>
+                        <td class="bold"> {{ username }} </td>
+                        <td> {{ each["place"] }} </td>
+                        <td> {{ each["allowed"] }} </td>
+                        <td> {{ each["date"] }} </td>
+                        <td> {{ each["hour_1"] }} </td>
+                        {% if each["hour_2"] %}
+                            <td> {{ each["hour_2"] }} </td>
+                        {% else %}
+                            <td> --- </td>
+                        {% endif %}
+                        {% if each["hour_3"] %}
+                            <td> {{ each["hour_3"] }} </td>
+                        {% else %}
+                            <td> --- </td>
+                        {% endif %}
+                        <td> {{ each["n_members"] }} / {{ each["max"] }} </td>
+                        <form action="/check" method="get">
+                            <td><button class="btn btn-primary" value="{{ each['id'] }}" name="get_id" type="submit">Check</button></td>
+                        </form>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+
+            {% if user_public_activities | length > 0 %}
+                {% for each in user_public_activities %}
+                    {% if loop.index0 % 2 == 0 %}
+                        <tr class="table table-primary">
                     {% else %}
-                        <td> --- </td>
+                        <tr class="table table-secondary">
                     {% endif %}
-                    <td> {{ each["n_members"] }} / {{ each["max"] }} </td>
-                    <form action="/check" method="get">
-                        <td><button class="btn btn-primary" value="{{ each['id'] }}" name="get_id" type="submit">Check</button></td>
-                    </form>
-                </tr>
-            {% endfor %}
-            {% for each in user_activities %}
-                {% if loop.index0 % 2 == 0 %}
-                    <tr class="table table-primary">
-                {% else %}
-                    <tr class="table table-secondary">
-                {% endif %}
-                    <td class="bold"> {{ each["activity"] }} </td>
-                    <td class="bold"> {{ usernames[loop.index0]['username'] }} </td>
-                    <td> {{ each["place"] }} </td>
-                    <td> {{ each["allowed"] }} </td>
-                    <td> {{ each["date"] }} </td>
-                    <td> {{ each["hour_1"] }} </td>
-                    {% if each["hour_2"] %}
-                        <td> {{ each["hour_2"] }} </td>
+                        <td class="bold"> {{ each["activity"] }} </td>
+                        <td class="bold"> {{ username }} </td>
+                        <td> {{ each["place"] }} </td>
+                        <td> {{ each["allowed"] }} </td>
+                        <td> {{ each["date"] }} </td>
+                        <td> {{ each["hour_1"] }} </td>
+                        {% if each["hour_2"] %}
+                            <td> {{ each["hour_2"] }} </td>
+                        {% else %}
+                            <td> --- </td>
+                        {% endif %}
+                        {% if each["hour_3"] %}
+                            <td> {{ each["hour_3"] }} </td>
+                        {% else %}
+                            <td> --- </td>
+                        {% endif %}
+                        <td> {{ each["n_members"] }} / {{ each["max"] }} </td>
+                        <form action="/check" method="get">
+                            <td><button class="btn btn-primary" value="{{ each['id'] }}" name="get_id" type="submit">Check</button></td>
+                        </form>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+
+            {% if friends_private_activities | length > 0 %}
+                {% for each in friends_private_activities %}
+                    {% if loop.index0 % 2 == 0 %}
+                        <tr class="table table-primary">
                     {% else %}
-                        <td> --- </td>
+                        <tr class="table table-secondary">
                     {% endif %}
-                    {% if each["hour_3"] %}
-                        <td> {{ each["hour_3"] }} </td>
+                        <td class="bold"> {{ each["activity"] }} </td>
+                        <td class="bold"> {{ fpa_usernames[loop.index0]['username'] }} </td>
+                        <td> {{ each["place"] }} </td>
+                        <td> {{ each["allowed"] }} </td>
+                        <td> {{ each["date"] }} </td>
+                        <td> {{ each["hour_1"] }} </td>
+                        {% if each["hour_2"] %}
+                            <td> {{ each["hour_2"] }} </td>
+                        {% else %}
+                            <td> --- </td>
+                        {% endif %}
+                        {% if each["hour_3"] %}
+                            <td> {{ each["hour_3"] }} </td>
+                        {% else %}
+                            <td> --- </td>
+                        {% endif %}
+                        <td> {{ each["n_members"] }} / {{ each["max"] }} </td>
+                        <form action="/check" method="get">
+                            <td><button class="btn btn-primary" value="{{ each['id'] }}" name="get_id" type="submit">Check</button></td>
+                        </form>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            
+            {% if public_activities | length > 0 %}
+                {% for each in public_activities %}
+                    {% if loop.index0 % 2 == 0 %}
+                        <tr class="table table-primary">
                     {% else %}
-                        <td> --- </td>
+                        <tr class="table table-secondary">
                     {% endif %}
-                    <td> {{ each["n_members"] }} / {{ each["max"] }} </td>
-                    <form action="/check" method="get">
-                        <td><button class="btn btn-primary" value="{{ each['id'] }}" name="get_id" type="submit">Check</button></td>
-                    </form>
-                </tr>
-            {% endfor %}
+                        <td class="bold"> {{ each["activity"] }} </td>
+                        <td class="bold"> {{ pa_usernames[loop.index0]['username'] }} </td>
+                        <td> {{ each["place"] }} </td>
+                        <td> {{ each["allowed"] }} </td>
+                        <td> {{ each["date"] }} </td>
+                        <td> {{ each["hour_1"] }} </td>
+                        {% if each["hour_2"] %}
+                            <td> {{ each["hour_2"] }} </td>
+                        {% else %}
+                            <td> --- </td>
+                        {% endif %}
+                        {% if each["hour_3"] %}
+                            <td> {{ each["hour_3"] }} </td>
+                        {% else %}
+                            <td> --- </td>
+                        {% endif %}
+                        <td> {{ each["n_members"] }} / {{ each["max"] }} </td>
+                        <form action="/check" method="get">
+                            <td><button class="btn btn-primary" value="{{ each['id'] }}" name="get_id" type="submit">Check</button></td>
+                        </form>
+                    </tr>
+                {% endfor %}
+            {% endif %}
         </tbody>
     </table>
 {% endblock %} 
