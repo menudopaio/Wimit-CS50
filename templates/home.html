@@ -86,11 +86,12 @@
                         </form>
                     </tr>
                 {% endfor %}
+            {% set total_len = user_private_activities | length %}
             {% endif %}
 
             {% if user_public_activities | length > 0 %}
                 {% for each in user_public_activities %}
-                    {% if loop.index0 % 2 == 0 %}
+                    {% if (loop.index0 + total_len) % 2 == 0 %}
                         <tr class="table table-primary">
                     {% else %}
                         <tr class="table table-secondary">
@@ -117,11 +118,12 @@
                         </form>
                     </tr>
                 {% endfor %}
+            {% set total_len = total_len + user_public_activities | length %}
             {% endif %}
 
             {% if friends_private_activities | length > 0 %}
                 {% for each in friends_private_activities %}
-                    {% if loop.index0 % 2 == 0 %}
+                    {% if (loop.index0 + total_len) % 2 == 0 %}
                         <tr class="table table-primary">
                     {% else %}
                         <tr class="table table-secondary">
@@ -148,11 +150,12 @@
                         </form>
                     </tr>
                 {% endfor %}
+            {% set total_len = total_len + friends_private_activities | length %}
             {% endif %}
             
             {% if public_activities | length > 0 %}
                 {% for each in public_activities %}
-                    {% if loop.index0 % 2 == 0 %}
+                    {% if (loop.index0 + total_len) % 2 == 0 %}
                         <tr class="table table-primary">
                     {% else %}
                         <tr class="table table-secondary">

@@ -17,6 +17,13 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+
+# Don't update automatically each refresh
+app.config['SESSION_REFRESH_EACH_REQUEST'] = False
+
+# Don't store in cache
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
 Session(app)
 
 # Configure CS50 Library to use SQLite database
@@ -37,13 +44,13 @@ ACTIVITIES = [
 ]
 
 
-
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
+    response.headers['Vary'] = 'Cookie'
     return response
 
 
