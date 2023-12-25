@@ -191,21 +191,12 @@ def home():
 
 
     return render_template("home.html", username=username, user_private_activities=user_private_activities, user_public_activities=user_public_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, activities=ACTIVITIES, image_link=image_link)
-    
-    # ---------------------
-    # Select public and private own activities
-    user_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public' OR (allowed = 'private' AND creator_id = ?)) AND n_members <= max AND date >= ? ORDER BY date, hour_1", session['user_id'], today)
-    
-    
 
-    return render_template("home.html", username=username, user_activities=user_activities, usernames=usernames, activities=ACTIVITIES, image_link=image_link)
-    
-    # -----------------------
 
 # MY WIM!TS PAGE
 @app.route("/mywimits")
 def mywimits():
-    # Set today and now
+    # Set today and filter
     today = date.today()
     filtered = request.args.get("filtered")
 
@@ -220,11 +211,15 @@ def mywimits():
 
     # Send to My Wimits all activities created by session["user_id"]
     usr_act = db.execute("SELECT * FROM add_wimit WHERE creator_id = ? AND date >= ? ORDER BY date, hour_1", session['user_id'], today)
-    usrnms = db.execute("SELECT username FROM users WHERE id = ?", session['user_id'])
-    usrnms = usrnms[0]['username']
+    
+    # Get username
+    username = db.execute("SELECT * FROM users WHERE id = ?", session['user_id'])
+    username = username[0]['username']
+    
     title = 'My Wim!ts'
     image_link = "static/img/sunrise.jpg"
-    return render_template("mywimits.html", image_link=image_link, activities=ACTIVITIES, usernames=usrnms, user_activities=usr_act, title=title)
+    print("username: ", username)
+    return render_template("mywimits.html", image_link=image_link, activities=ACTIVITIES, username=username, user_activities=usr_act, title=title, homefiltered=home_filtered)
 
 # CHECK & CHECK DETAILS ROUTES
 @app.route("/check", methods=["POST", "GET"])

@@ -86,8 +86,8 @@
                         </form>
                     </tr>
                 {% endfor %}
-            {% set total_len = user_private_activities | length %}
             {% endif %}
+            {% set total_len = total_len | default(0) + user_private_activities | length %}
 
             {% if user_public_activities | length > 0 %}
                 {% for each in user_public_activities %}
@@ -118,8 +118,8 @@
                         </form>
                     </tr>
                 {% endfor %}
-            {% set total_len = total_len + user_public_activities | length %}
             {% endif %}
+            {% set total_len = total_len | default(0) + user_public_activities | length %}
 
             {% if friends_private_activities | length > 0 %}
                 {% for each in friends_private_activities %}
@@ -150,8 +150,8 @@
                         </form>
                     </tr>
                 {% endfor %}
-            {% set total_len = total_len + friends_private_activities | length %}
             {% endif %}
+            {% set total_len = total_len | default(0) + friends_private_activities | length %}
             
             {% if public_activities | length > 0 %}
                 {% for each in public_activities %}
