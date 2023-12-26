@@ -23,6 +23,29 @@ def set_image_link(cur, ACTIVITIES):
     return image_link
 
 
+# Set background-image based on filtered
+def set_image_linkv2(filtered, ACTIVITIES):
+    image_link = None
+    if filtered == ACTIVITIES[0]:
+        image_link = "/static/img/coding1-t.png"
+    elif filtered == ACTIVITIES[1]:
+        image_link = "/static/img/yoga.png"
+    elif filtered == ACTIVITIES[2]:
+        image_link = "/static/img/nature-t.png"
+    elif filtered == ACTIVITIES[3]:
+        image_link = "/static/img/mitmi-t.png"
+    elif filtered == ACTIVITIES[4]:
+        image_link = "/static/img/sports-t.png"
+    elif filtered == ACTIVITIES[5]:
+        image_link = "/static/img/noreason1-t.png"
+    elif filtered == ACTIVITIES[6]:
+        image_link = "/static/img/music.png"
+    else:
+        image_link = "/static/img/sunrise.jpg"
+    return image_link
+
+
+
 # Check if all parameters are in the correct data type
 def check_wimit_errors(now, today, activity, ACTIVITIES, allowed, dates, hour_1, hour_2, hour_3, place):
     if (activity not in ACTIVITIES):

@@ -1,12 +1,12 @@
 from datetime import date, datetime
 from functools import wraps
 from cs50 import SQL
-
+import sqlite3
 from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import set_image_link, check_wimit_errors
+from helpers import set_image_link, check_wimit_errors, set_image_linkv2
 
 # Configure application
 app = Flask(__name__)
@@ -173,7 +173,6 @@ def home():
     username = db.execute("SELECT * FROM users WHERE id = ?", session['user_id'])
     username = username[0]['username']
 
-    # ---------------------
     # Select private_activities created by user
     user_private_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'private') AND (creator_id = ?) AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
 
@@ -181,14 +180,12 @@ def home():
     user_public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND (creator_id = ?) AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
 
     # Select private activities created by friends
-    friends_private_activities = db.execute("SELECT * FROM add_wimit JOIN friends ON add_wimit.creator_id = friends.friend_id WHERE friends.user_id = ? AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
+    friends_private_activities = db.execute("SELECT * FROM add_wimit JOIN friends ON add_wimit.creator_id = friends.friend_id WHERE friends.user_id = ? AND date >= ? and allowed = 'private' ORDER BY date, hour_1", session["user_id"], today)
     fpa_usernames = db.execute("SELECT * FROM users JOIN friends ON users.id = friends.friend_id JOIN add_wimit ON friends.friend_id = add_wimit.creator_id WHERE friends.user_id = ? AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
     
-
-    # Select public activities 
-    public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND creator_id != ? AND (n_members < max) AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
+    # Select public activities not from the user
+    public_activities = db.execute("SELECT * FROM add_wimit WHERE allowed = 'public' AND creator_id != ? AND n_members < max AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
     pa_usernames = db.execute("SELECT * FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE allowed = 'public' AND creator_id != ? AND n_members < max AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
-
 
     return render_template("home.html", username=username, user_private_activities=user_private_activities, user_public_activities=user_public_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, activities=ACTIVITIES, image_link=image_link)
 
@@ -198,28 +195,19 @@ def home():
 def mywimits():
     # Set today and filter
     today = date.today()
-    filtered = request.args.get("filtered")
 
-    home_filtered = db.execute("SELECT * FROM add_wimit WHERE creator_id = ? AND n_members <= max AND date >= ? AND activity = ? ORDER BY date, hour_1", session['user_id'], today, filtered)
-    
-    if (home_filtered):
-        try:
-            image_link = set_image_link(home_filtered[0], ACTIVITIES)
-            return render_template("home.html", activities=ACTIVITIES, user_activities=home_filtered, image_link=image_link, title='My wim!ts - ' + filtered)
-        except KeyError:
-            return render_template("login.html")
-
-    # Send to My Wimits all activities created by session["user_id"]
-    usr_act = db.execute("SELECT * FROM add_wimit WHERE creator_id = ? AND date >= ? ORDER BY date, hour_1", session['user_id'], today)
-    
     # Get username
     username = db.execute("SELECT * FROM users WHERE id = ?", session['user_id'])
     username = username[0]['username']
     
-    title = 'My Wim!ts'
+    # Set image and title
     image_link = "static/img/sunrise.jpg"
-    print("username: ", username)
-    return render_template("mywimits.html", image_link=image_link, activities=ACTIVITIES, username=username, user_activities=usr_act, title=title, homefiltered=home_filtered)
+    title = 'My Wim!ts'
+
+    # All activities created by session["user_id"]
+    usr_act = db.execute("SELECT * FROM add_wimit WHERE creator_id = ? AND date >= ? ORDER BY date, hour_1", session['user_id'], today)
+    return render_template("mywimits.html", username=username, activities=ACTIVITIES, user_activities=usr_act, image_link=image_link, title=title)
+
 
 # CHECK & CHECK DETAILS ROUTES
 @app.route("/check", methods=["POST", "GET"])
@@ -547,20 +535,48 @@ def home_filters():
     today = date.today()
     filtered = request.args.get("filtered")
 
-    # Select public and private own activities, filtered to user's election
+    # Select public and private activities, filtered
     try:
-        home_filtered = db.execute("SELECT * FROM add_wimit WHERE ((allowed = 'public') OR (allowed = 'private' AND creator_id = ?)) AND n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", session['user_id'], today, filtered)
-    except KeyError:
-        return render_template("login.html")
-    except IndexError:
-        return render_template("login.html")
+        home_filtered = db.execute("SELECT * FROM add_wimit WHERE n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", today, filtered)
+            
+        # Get username
+        username = db.execute("SELECT * FROM users WHERE id = ?", session['user_id'])
+        username = username[0]['username']
 
-    # Set image and render home page
-    if (home_filtered):
-        image_link = set_image_link(home_filtered[0], ACTIVITIES)
-        return render_template("home.html", activities=ACTIVITIES, user_activities=home_filtered, image_link=image_link, title='Wim!t Board - ' + filtered)
-    else:
-        return redirect("/")
+        # Select private_activities created by user
+        user_private_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'private') AND (creator_id = ?) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+
+        # Select public activities created by user
+        user_public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND (creator_id = ?) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+
+        # Select private activities created by friends
+        friends_private_activities = db.execute("SELECT * FROM add_wimit JOIN friends ON add_wimit.creator_id = friends.friend_id WHERE friends.user_id = ? AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+        fpa_usernames = db.execute("SELECT * FROM users JOIN friends ON users.id = friends.friend_id JOIN add_wimit ON friends.friend_id = add_wimit.creator_id WHERE friends.user_id = ? AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+        
+        # Select public activities 
+        public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND creator_id != ? AND (n_members < max) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+        pa_usernames = db.execute("SELECT * FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE allowed = 'public' AND creator_id != ? AND n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+
+        
+        # If filter selected
+        if (home_filtered):
+            image_link = set_image_link(home_filtered[0], ACTIVITIES)
+            return render_template("home.html", activities=ACTIVITIES, user_public_activities=user_public_activities, user_private_activities=user_private_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, image_link=image_link, title='My Wim!ts - ' + filtered)
+
+        # If filter = All
+        if (filtered == 'all'):
+            usr_act = db.execute("SELECT * FROM add_wimit WHERE n_members < max AND date >= ?", session["user_id"], today)
+            image_link = "static/img/sunrise.jpg"
+            return render_template("home.html", activities=ACTIVITIES, user_activities=usr_act, image_link=image_link, title='My Wim!ts - All')
+        else:
+            image_link = set_image_link(home_filtered[0], ACTIVITIES)
+            return render_template("home.html", username=username, user_private_activities=user_private_activities, user_public_activities=user_public_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, activities=ACTIVITIES, image_link=image_link)
+
+    except (KeyError, IndexError):
+        image_link = set_image_linkv2(filtered, ACTIVITIES)
+        return render_template("home.html", activities=ACTIVITIES, image_link=image_link)
+
+
 
 # MY WIM!TS DROPDOWN FILTERS ROUTE
 @app.route("/mywimits-filters", methods=["GET"])
@@ -570,27 +586,39 @@ def mywimits_filters():
     today = date.today()
     filtered = request.args.get("filtered")
 
-    # Select public and private own activities, filtered to user's election
-    try:
-        home_filtered = db.execute("SELECT * FROM add_wimit WHERE creator_id = ? AND n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", session['user_id'], today, filtered)
-    except KeyError:
-        return render_template("login.html")
-    except IndexError:
-        return render_template("login.html")
+    # Get username
+    username = db.execute("SELECT * FROM users WHERE id = ?", session['user_id'])
+    username = username[0]['username']
+    
+    if filtered is None:
+        # Set image and title
+        image_link = "static/img/sunrise.jpg"
+        title = 'My Wim!ts2'
+        print("DOS")
+        # All activities created by session["user_id"]
+        usr_act = db.execute("SELECT * FROM add_wimit WHERE creator_id = ? AND date >= ? ORDER BY date, hour_1", session['user_id'], today)
+        return render_template("mywimits.html", username=username, activities=ACTIVITIES, user_activities=usr_act, image_link=image_link, title=title)
+    
+    elif (filtered == 'all'):
+        usr_act = db.execute("SELECT * FROM add_wimit WHERE creator_id = ? AND date >= ?", session["user_id"], today)
+        image_link = "static/img/sunrise.jpg"
+        return render_template("mywimits.html", username=username, activities=ACTIVITIES, user_activities=usr_act, image_link=image_link, title='My Wim!ts - All')
 
-    # Set image and render mywimits page
-    if (home_filtered):
-        image_link = set_image_link(home_filtered[0], ACTIVITIES)
-        return render_template("mywimits.html", activities=ACTIVITIES, user_activities=home_filtered, image_link=image_link, title='My Wim!ts - ' + filtered)
-
-    # If no filter
-    return redirect("/mywimits")
+    else:
+        # Ejecutar la consulta
+        my_filtered = db.execute("SELECT * FROM add_wimit WHERE creator_id = ? AND date >= ? AND activity = ? ORDER BY date, hour_1", session['user_id'], today, filtered) 
+        title = 'My Wim!ts - ' + filtered
+        try:
+            image_link = set_image_link(my_filtered[0], ACTIVITIES)
+        except IndexError:
+            image_link = set_image_linkv2(filtered, ACTIVITIES)
+        return render_template("mywimits.html", image_link=image_link, activities=ACTIVITIES, username=username, user_activities=my_filtered, title=title)
 
 
 @app.route("/friends", methods=["GET"])
 def friends():
     # GET
-    image_link = "static/img/sunrise.jpg"
+    image_link = "static/img/friendshiphot.jpg"
     
     # Check if user has friend requests and/or friends
     friends = db.execute("SELECT friend_request.id, user1_id, username, status, friends_since FROM friend_request JOIN users ON friend_request.user1_id = users.id WHERE friend_request.user2_id = ?", session['user_id'])
@@ -601,8 +629,8 @@ def friends():
         return render_template("friends.html", friends=friends, image_link=image_link)
     elif friends2:
         return render_template("friends.html", friends2=friends2, image_link=image_link)
-
-    return render_template("friends.html", image_link=image_link)
+    else:
+        return render_template("friends.html", image_link=image_link)
 
 
 # ADD NEW FRIEND (NO SUCCESS MESSAGE)

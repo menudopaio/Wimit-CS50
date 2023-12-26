@@ -12,20 +12,20 @@
     </form>
     <p></p>
     <table>
-        <thead>
+        <thead class="double_bold">
             <tr>
-                <th>User Id</th>
+                <th></th>
                 <th>Username</th>
                 <th>Friend request date</th>
                 <th>Status</th>
                 <th></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="whitee bold">
             {% for each in friends %}
                     {% if each['status'] == 'Pending' %}
                         <tr>
-                            <td> {{ each['user1_id'] }}</td>
+                            <td></td>
                             <td> {{ each['username'] }} </td>
                             <td> {{ each['friends_since'] }} </td>
                             <td> {{ each['status'] }}</td>
@@ -38,7 +38,7 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td> {{ each['user1_id'] }} </td>
+                            <td></td>
                             <td> {{ each['username'] }} </td>
                             <td> {{ each['friends_since'] }} </td>
                             <td> {{ each['status'] }}</td>
@@ -48,14 +48,14 @@
             {% for each in friends2 %}
                 {% if each['status'] != 'Pending' %}
                     <tr>
-                        <td> {{ each['user2_id'] }}</td>
+                        <td></td>
                         <td> {{ each['username'] }} </td>
                         <td> {{ each['friends_since'] }} </td>
                         <td> {{ each['status'] }}</td>
                     </tr>
                 {% else %}
                     <tr>
-                        <td> {{ each['user2_id'] }} </td>
+                        <td></td>
                         <td> {{ each['username'] }} </td>
                         <td> {{ each['friends_since'] }} </td>
                         <td> {{ each['status'] }}</td>
