@@ -145,6 +145,7 @@ def login():
     return render_template("login.html")
 
 # LOG OUT ROUTE
+@login_required
 @app.route("/logout")
 def logout():
     """Log user out"""
@@ -164,10 +165,6 @@ def home():
     
     # Set image
     image_link = "static/img/sunrise.jpg"
-
-    # If logged in: user; else: Guest
-    if session.get("user_id") is None:
-        session["user_id"] = 0
 
     # Get username
     username = db.execute("SELECT * FROM users WHERE id = ?", session['user_id'])
@@ -191,6 +188,7 @@ def home():
 
 
 # MY WIM!TS PAGE
+@login_required
 @app.route("/mywimits")
 def mywimits():
     # Set today and filter
@@ -210,6 +208,7 @@ def mywimits():
 
 
 # CHECK & CHECK DETAILS ROUTES
+@login_required
 @app.route("/check", methods=["POST", "GET"])
 def check():
     # Check wimit by its id
@@ -306,6 +305,7 @@ def check():
         return render_template("check_details.html", chosen=chosen, html_code=html_code, image_link=image_link, a=user_wimits, enrolled=True, hr1=pr1, hr2=pr2, hr3=pr3, cur_mem=cur_mem)
 
 # ADD WIMIT ROUTE
+@login_required
 @app.route("/addwimit", methods=["POST", "GET"])
 def addwimit():
 
@@ -384,6 +384,7 @@ def addwimit():
 
 # JUST ENROLLED, CURRENT ROUTE
 # Comming from /check["id"]->Enroll
+@login_required
 @app.route("/current", methods=["POST"])
 def current():
     if request.method == "POST":
@@ -415,8 +416,9 @@ def current():
         db.execute("UPDATE add_wimit SET n_members = ? WHERE id = ?", (cur["n_members"]), wimit_id)
         return render_template("current-wimits.html", cur=cur, image_link=image_link)
 
-# UNENROLL ROUTE
+
 # Unenroll from an activity
+@login_required
 @app.route("/unenroll", methods=["POST"])
 def unenroll():
     # Get activity id and use it to get cur["n_members"] and update it
@@ -442,6 +444,7 @@ def unenroll():
     return redirect("/")
 
 # EDIT ROUTE
+@login_required
 @app.route("/edit", methods=["POST", "GET"])
 def edit():
     # POST
@@ -460,6 +463,7 @@ def edit():
     return render_template("login.html")
 
 # EDITED --> UPDATE WIMIT AND RENDER HOME PAGE
+@login_required
 @app.route("/edited", methods=["POST"])
 def edited():
     
@@ -520,6 +524,7 @@ def edited():
         
 
 # DELETE WIM!T ROUTE
+@login_required
 @app.route("/delete", methods=["POST"])
 def delete():
     wimit_delete = request.form.get("delete_btn")
@@ -528,6 +533,7 @@ def delete():
     return redirect("/")
 
 # HOME DROPDOWN FILTERS ROUTE
+@login_required
 @app.route("/home-filters", methods=["GET"])
 def home_filters():
 
@@ -579,6 +585,7 @@ def home_filters():
 
 
 # MY WIM!TS DROPDOWN FILTERS ROUTE
+@login_required
 @app.route("/mywimits-filters", methods=["GET"])
 def mywimits_filters():
 
@@ -615,6 +622,7 @@ def mywimits_filters():
         return render_template("mywimits.html", image_link=image_link, activities=ACTIVITIES, username=username, user_activities=my_filtered, title=title)
 
 
+@login_required
 @app.route("/friends", methods=["GET"])
 def friends():
     # GET
@@ -634,6 +642,7 @@ def friends():
 
 
 # ADD NEW FRIEND (NO SUCCESS MESSAGE)
+@login_required
 @app.route("/search-friend", methods=["POST"])
 def search_friends():
     # POST
@@ -675,7 +684,9 @@ def search_friends():
             
         except IndexError:
             return redirect("/")
-            
+
+
+@login_required
 @app.route("/accept-reject", methods=["POST"])
 def accept_reject():
     id_a = request.form.get("accept_friend")

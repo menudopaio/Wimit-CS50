@@ -7,12 +7,17 @@
 <h1> {{ message }} </h1>
 <img src="static/img/error.jpg" width="50%">
 <script>
+    // Obtener la URL de la página de referencia
+    var referrer = document.referrer;
+
     // Esta función redirige a otra página después de un cierto tiempo
     function redirectToAnotherPage() {
-        setTimeout(function() {
-            window.location.href = "/addwimit";
-        }, 2000); // 2000 milisegundos de tiempo de espera antes de la redirección
-    }
+    setTimeout(function() {
+        // Concatenar la URL de la página de referencia con la nueva URL
+        ;
+        window.location.href = referrer;
+    }, 2000); // 2000 milisegundos de tiempo de espera antes de la redirección
+}
 
     // Llama a la función de redirección cuando la página se carga
     window.onload = function() {
