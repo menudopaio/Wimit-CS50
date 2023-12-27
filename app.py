@@ -418,7 +418,9 @@ def addwimit():
     redirect_nav = request.args.get("redirect_nav")
     # Check if friends_pending
     pending = check_notifications()
-    
+
+    username = db.execute("SELECT * FROM users WHERE id = ?", session['user_id'])
+    username = username[0]['username']
     if (redirect_nav):
         
         try:
@@ -426,12 +428,13 @@ def addwimit():
             cur = cur[0]
             image_link = set_image_link(cur, ACTIVITIES)
             
-            return render_template("addwimit.html", pending=pending, activities=ACTIVITIES, image_link=image_link, today=today, now=now, redirect_nav=redirect_nav)
-        except UnboundLocalError:
-            return render_template("addwimit.html", activities=ACTIVITIES, image_link=image_link, today=today, now=now, redirect_nav=redirect_nav)
+            return render_template("addwimit.html", username=username, pending=pending, activities=ACTIVITIES, image_link=image_link, today=today, now=now, redirect_nav=redirect_nav)
+        except (UnboundLocalError, IndexError):
+            image_link = set_image_linkv2(redirect_nav, ACTIVITIES)
+            return render_template("addwimit.html", username=username, activities=ACTIVITIES, image_link=image_link, today=today, now=now, redirect_nav=redirect_nav)
 
     image_link = "static/img/summer-t.png"
-    return render_template("addwimit.html", pending=pending, activities=ACTIVITIES, image_link=image_link, today=today, now=now)
+    return render_template("addwimit.html", username=username, pending=pending, activities=ACTIVITIES, image_link=image_link, today=today, now=now)
 
 
 # JUST ENROLLED, CURRENT ROUTE
@@ -701,17 +704,19 @@ def friends():
     # Check if friends_pending
     pending = check_notifications()
 
+    username = db.execute("SELECT * FROM users WHERE id = ?", session['user_id'])
+    username = username[0]['username']
     # Check if user has friend requests and/or friends
     friends = db.execute("SELECT friend_request.id, user1_id, username, status, friends_since FROM friend_request JOIN users ON friend_request.user1_id = users.id WHERE friend_request.user2_id = ?", session['user_id'])
     friends2 = db.execute("SELECT user2_id, username, status, friends_since FROM friend_request JOIN users ON friend_request.user2_id = users.id WHERE friend_request.user1_id = ?", session['user_id'])
     if friends and friends2:
-        return render_template("friends.html", pending=pending, friends=friends, friends2=friends2, image_link=image_link)
+        return render_template("friends.html", username=username, pending=pending, friends=friends, friends2=friends2, image_link=image_link)
     elif friends:
-        return render_template("friends.html", pending=pending, friends=friends, image_link=image_link)
+        return render_template("friends.html", username=username, pending=pending, friends=friends, image_link=image_link)
     elif friends2:
-        return render_template("friends.html", pending=pending, friends2=friends2, image_link=image_link)
+        return render_template("friends.html", username=username, pending=pending, friends2=friends2, image_link=image_link)
     else:
-        return render_template("friends.html", pending=pending, image_link=image_link)
+        return render_template("friends.html", username=username, pending=pending, image_link=image_link)
 
 
 # ADD NEW FRIEND (NO SUCCESS MESSAGE)

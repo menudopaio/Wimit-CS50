@@ -13,3 +13,4 @@
 10. Eliminar tabla izquierda check_details.html.
 11. En el grafico resumen del wimit hacer visible el status (FULL, Ready!, Need more people!)
 12. Cuando hay participantes minimos sumando distintos horarios, no debe ser valido.
+13. Nombre usuario en el nav bar
