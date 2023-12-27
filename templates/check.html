@@ -50,7 +50,7 @@
                         <td> <button class="btn btn-primary" name="enroll_btn" value="{{a['id']}}" type="submit">Enroll</button></td>
                     {% endif %}
                 </form>
-                {% if a["creator_id"] == session["user_id"] %}
+                {% if a["creator_id"] == session["user_id"] and (enrolled == true) %}
                     <td><form action="/edit" method="post"><button class="btn btn-primary" name="edit_btn" value="{{a['id']}}" type="submit">Edit</button></form></td>
                 {% endif %}
             </tr>

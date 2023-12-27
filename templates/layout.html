@@ -48,6 +48,9 @@
                         <ul class="navbar-nav ms-auto mt-2">
                             {% block nav %}{% endblock %}
                             <li class="nav-item"><a class="nav-link bold" href="/friends">Friends</a></li>
+                            {% if pending %}
+                                <span class="pending_friends"></span>
+                            {% endif %}
                             <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                         </ul>
                     {% else %}

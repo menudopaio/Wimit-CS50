@@ -62,7 +62,7 @@
                 <form action="/unenroll" method="post">
                     <td> <button class="btn btn-secondary" name="unenroll_btn" value="{{a['id']}}" type="submit">Unenroll</button></td>
                 </form>
-                {% if a["creator_id"] == session["user_id"] and a["allowed"] == 'private' %}
+                {% if a["creator_id"] == session["user_id"] %}
                     <td><form action="/edit" method="post"><button class="btn btn-primary" name="edit_btn" value="{{a['id']}}" type="submit">Edit</button></form></td>
                 {% endif %}
                 {% if a["creator_id"] == session["user_id"] and a["n_members"] == 1 %}
@@ -72,41 +72,8 @@
         </tbody>
     </table>
     <div class="flex">
-        <table class="table table-bordered preferences_table tt">
-            <thead>
-                <tr>
-                    <th>Place</th>
-                    <th>Date</th>
-                    <th> {{ a["hour_1"] }} </th>
-                    {% if a["hour_2"] %}
-                        <th> {{ a["hour_2"] }} </th>
-                        {% if a["hour_3"] %}
-                            <th> {{ a["hour_3"] }} </th>
-                        {% endif %}
-                    {% endif %}
-                </tr>
-            </thead>
-            <tbody class="tt">
-                <tr class="tt bold">
-                    <td> {{ a["place"] }} </td>
-                    <td> {{ a["date"] }} </td>
-                    <td> {{ hr1 }} </td>
-                    {% if a["hour_2"] %}
-                        <td> {{ hr2 }} </td>
-                        {% if a["hour_3"] %}
-                            <td> {{ hr3 }} </td>
-                        {% endif %}
-                    {% endif %}
-                </tr>
-            </tbody>
-        </table>
         <div class="imagen-container">
             {{ html_code | safe }}
         </div>
-        {% if a['n_members'] >= a['min'] %}
-        
-        {% else %}
-        <h2 class="table table-bordered tt final_table">Not enough members to decide final time and place.</h2>
-        {% endif %}
     </div>
 {% endblock %}
