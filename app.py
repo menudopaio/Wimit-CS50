@@ -664,8 +664,8 @@ def mywimits_filters():
 def friends():
     # GET
     image_link = "static/img/friendshiphot.jpg"
-
-    friends_query = """
+    """
+    friends_query = 
         SELECT friend_request.id, user1_id AS user_id, username, status, friends_since
         FROM friend_request
         JOIN users ON friend_request.user1_id = users.id
@@ -675,11 +675,21 @@ def friends():
         FROM friend_request
         JOIN users ON friend_request.user2_id = users.id
         WHERE friend_request.user1_id = ?
-    """
+    
 
     friends = db.execute(friends_query, session['user_id'], session['user_id'])
     return render_template("friends.html", username=session['user_username'], pending=session['pending_friends'], friends=friends, image_link=image_link)
-
+    """
+    friends = db.execute("SELECT friend_request.id, user1_id, username, status, friends_since FROM friend_request JOIN users ON friend_request.user1_id = users.id WHERE friend_request.user2_id = ?", session['user_id'])
+    friends2 = db.execute("SELECT user2_id, username, status, friends_since FROM friend_request JOIN users ON friend_request.user2_id = users.id WHERE friend_request.user1_id = ?", session['user_id'])
+    if friends and friends2:
+        return render_template("friends.html", username=session['user_username'], pending=session['pending_friends'], friends=friends, friends2=friends2, image_link=image_link)
+    elif friends:
+        return render_template("friends.html", username=session['user_username'], pending=session['pending_friends'], friends=friends, image_link=image_link)
+    elif friends2:
+        return render_template("friends.html", username=session['user_username'], pending=session['pending_friends'], friends2=friends2, image_link=image_link)
+    else:
+        return render_template("friends.html", username=session['user_username'], pending=session['pending_friends'], image_link=image_link)
 
 # ADD NEW FRIEND (NO SUCCESS MESSAGE)
 @login_required
