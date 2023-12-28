@@ -380,11 +380,11 @@ def addwimit():
             return render_template("error.html", pending=session['pending_friends'], message="Hour options must be different.")
         if (not place):
             return render_template("error.html", pending=session['pending_friends'], message="Must meet at some place.")
-        if (mini < 1):
+        if (int(mini) < 1):
             return render_template("error.html", pending=session['pending_friends'], message="Must meet somebody.")
-        if (maxi > 50):
+        if (int(maxi) > 50):
             return render_template("error.html", pending=session['pending_friends'], message="Max 50 people.")
-        if (mini > maxi):
+        if (int(mini) > int(maxi)):
             return render_template("error.html", pending=session['pending_friends'], message="Minimum members must be less than maximum.")
         # Create event in the database
         try:
@@ -665,17 +665,20 @@ def friends():
     # GET
     image_link = "static/img/friendshiphot.jpg"
 
-    # Check if user has friend requests and/or friends
-    friends = db.execute("SELECT friend_request.id, user1_id, username, status, friends_since FROM friend_request JOIN users ON friend_request.user1_id = users.id WHERE friend_request.user2_id = ?", session['user_id'])
-    friends2 = db.execute("SELECT user2_id, username, status, friends_since FROM friend_request JOIN users ON friend_request.user2_id = users.id WHERE friend_request.user1_id = ?", session['user_id'])
-    if friends and friends2:
-        return render_template("friends.html", username=session['user_username'], pending=session['pending_friends'], friends=friends, friends2=friends2, image_link=image_link)
-    elif friends:
-        return render_template("friends.html", username=session['user_username'], pending=session['pending_friends'], friends=friends, image_link=image_link)
-    elif friends2:
-        return render_template("friends.html", username=session['user_username'], pending=session['pending_friends'], friends2=friends2, image_link=image_link)
-    else:
-        return render_template("friends.html", username=session['user_username'], pending=session['pending_friends'], image_link=image_link)
+    friends_query = """
+        SELECT friend_request.id, user1_id AS user_id, username, status, friends_since
+        FROM friend_request
+        JOIN users ON friend_request.user1_id = users.id
+        WHERE friend_request.user2_id = ? 
+        UNION
+        SELECT friend_request.id, user2_id AS user_id, username, status, friends_since
+        FROM friend_request
+        JOIN users ON friend_request.user2_id = users.id
+        WHERE friend_request.user1_id = ?
+    """
+
+    friends = db.execute(friends_query, session['user_id'], session['user_id'])
+    return render_template("friends.html", username=session['user_username'], pending=session['pending_friends'], friends=friends, image_link=image_link)
 
 
 # ADD NEW FRIEND (NO SUCCESS MESSAGE)

@@ -19,3 +19,4 @@
 15. Arreglar testigo de Friends pending.
 16. Globalizar funcion today y añadir datos de session['user_username'], session['friends_pending'].
 17. Arreglado: en /add_wimit se puede poner un min mas alto que un max.
+18. app.py y friends.html unificar sql queries.

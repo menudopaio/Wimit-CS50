@@ -59,37 +59,6 @@
                         </tr>
                     {% endif %}
             {% endfor %}
-            {% for each in friends2 %}
-                {% if each['status'] != 'Pending' %}
-                    <tr>
-                        <td></td>
-                        <td> {{ each['username'] }} </td>
-                        <td> {{ each['friends_since'] }} </td>
-                        {% if each['status'] == 'Accepted' %}
-                            {% set clase = 'acceptedF' %}
-                        {% elif each['status'] == 'Pending' %}
-                            {% set clase = 'pendingF' %}
-                        {% else %}
-                            {% set clase = 'rejectedF' %}
-                        {% endif %}
-                        <td class="{{ clase }}"> {{ each['status'] }} </td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td></td>
-                        <td> {{ each['username'] }} </td>
-                        <td> {{ each['friends_since'] }} </td>
-                        {% if each['status'] == 'Accepted' %}
-                            {% set clase = 'acceptedF' %}
-                        {% elif each['status'] == 'Pending' %}
-                            {% set clase = 'pendingF' %}
-                        {% else %}
-                            {% set clase = 'rejectedF' %}
-                        {% endif %}
-                        <td class="{{ clase }}"> {{ each['status'] }} </td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
         </tbody>
     </table>
 {% endblock %}
