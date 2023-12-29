@@ -142,11 +142,7 @@ table .left
     margin-top: auto;
     margin-bottom: auto;
     text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 350px;
-    height: 350px;
+    display: inline-block;
 }
 
 .pending_friends
@@ -172,4 +168,3 @@ table .left
 {
     color: rgb(155, 0, 0);
 }
-
