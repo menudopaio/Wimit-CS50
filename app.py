@@ -184,11 +184,12 @@ def home():
     init_today()
     # Set image
     image_link = "static/img/sunrise.jpg"
+    title = 'Wim!t'
     try:
         x = session['user_id']
     except KeyError:
         return redirect("/login")
-
+    
     # Select private_activities created by user
     user_private_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'private') AND (creator_id = ?) AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
 
@@ -203,13 +204,18 @@ def home():
     public_activities = db.execute("SELECT * FROM add_wimit WHERE allowed = 'public' AND creator_id != ? AND n_members < max AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
     pa_usernames = db.execute("SELECT * FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE allowed = 'public' AND creator_id != ? AND n_members < max AND date >= ? ORDER BY date, hour_1", session["user_id"], today)
 
-    return render_template("home.html", pending=session['pending_friends'], username=session['user_username'], user_private_activities=user_private_activities, user_public_activities=user_public_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, activities=ACTIVITIES, image_link=image_link)
+    return render_template("home.html", title=title, pending=session['pending_friends'], username=session['user_username'], user_private_activities=user_private_activities, user_public_activities=user_public_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, activities=ACTIVITIES, image_link=image_link)
 
 
 # MY WIM!TS PAGE
 @login_required
 @app.route("/mywimits")
 def mywimits():
+    
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect("/login")
     
     init_today()
     # Set image and title
@@ -226,6 +232,11 @@ def mywimits():
 @app.route("/check", methods=["POST", "GET"])
 def check():
     init_today()
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect("/login")
+    
     # Check wimit by its id
     if request.method == "GET":
         activity_id = request.args.get("get_id")
@@ -277,10 +288,17 @@ def check():
         tamano_fuente = 15
 
         # Crear el gráfico circular con fondo transparente
-        fig, ax = plt.subplots(figsize=(3, 3))
+        fig, ax = plt.subplots(figsize=(3.5, 3.5))
         wedges, texts = ax.pie(hours, labels=etiquetas, colors=colores, startangle=90, textprops={'fontsize': tamano_fuente-2})
 
-        
+        for i, text in enumerate(texts):
+            # Verifica si el valor correspondiente en hours no es cero
+            if hours[i] > 0:
+                # Ajusta la posición solo para valores no cero
+                text.set_position((text.get_position()[0] * 0.93, text.get_position()[1] * 0.93))
+            else:
+                text.set_visible(False)
+
         # Agregar texto al centro del círculo
         texto_centro = ""
 
@@ -309,13 +327,16 @@ def check():
         # Ajustar la separación de las etiquetas numéricas del centro del gráfico
         separacion_factor = 1.75  # Puedes ajustar este valor según tus preferencias
 
-        # Agregar etiquetas numéricas
+        # Agregar etiquetas y valores numéricos
         for i, (etiqueta, valor) in enumerate(zip(etiquetas, hours)):
-            if hours[i] > 0:
+            if valor > 0:
                 angle = (wedges[i].theta2 - wedges[i].theta1) / 2 + wedges[i].theta1
                 x = separacion_factor * 0.35 * np.cos(angle * (3.14159 / 180))
                 y = separacion_factor * 0.35 * np.sin(angle * (3.14159 / 180))
+
+                # Miembros inscritos en la franja horaria Hx
                 ax.text(x, y, str(valor), ha='center', va='center', fontsize=tamano_fuente)
+
             else:
                 continue
 
@@ -337,7 +358,7 @@ def check():
         # Imprimir el código HTML con la imagen base64
         html_code = f'<img src="data:image/png;base64,{imagen_base64}" alt="Gráfico Circular">'
 
-        return render_template("check_details.html", pending=session['friends_pending'], html_code=html_code, image_link=image_link, a=user_wimits, enrolled=True, hr1=pr1, hr2=pr2, hr3=pr3, cur_mem=cur_mem)
+        return render_template("check_details.html", pending=session['pending_friends'], html_code=html_code, image_link=image_link, a=user_wimits, enrolled=True, hr1=pr1, hr2=pr2, hr3=pr3, cur_mem=cur_mem)
 
 
 # ADD WIMIT ROUTE
@@ -348,10 +369,18 @@ def addwimit():
     # Set today and now
     init_today()
     now = datetime.now()
-
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect ("/login")
+    
     # Get all data from form
     if request.method == "POST":
-        activity = request.form.get("activity", "Mitmi")
+        
+        if request.form.get("otros"):
+            activity = request.form.get("otros")
+        else:
+            activity = request.form.get("activity", "Mitmi")
         allowed = request.form.get("allowed")
         mini = request.form.get("min", 1)
         maxi = request.form.get("max", 50)
@@ -364,7 +393,7 @@ def addwimit():
 
 
         # Check if all parameters are in the correct data type
-        if (activity not in ACTIVITIES):
+        if (activity not in ACTIVITIES) and not (request.form.get("otros")):
             return render_template("error.html", pending=session['pending_friends'], message="You must select a valid activity.")
         if (not allowed):
             return render_template("error.html", pending=session['pending_friends'], message="Public or Private.")
@@ -430,6 +459,11 @@ def addwimit():
 @login_required
 @app.route("/current", methods=["POST"])
 def current():
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect("/login")
+    
     if request.method == "POST":
         # Get current activity data
         wimit_id = request.form.get("enroll_btn")
@@ -464,6 +498,11 @@ def current():
 @login_required
 @app.route("/unenroll", methods=["POST"])
 def unenroll():
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect("/login")
+
     # Get activity id and use it to get cur["n_members"] and update it
     wimit_id = request.form.get("unenroll_btn")
     cur = db.execute("SELECT * FROM add_wimit WHERE id = ?", wimit_id)
@@ -491,6 +530,11 @@ def unenroll():
 @login_required
 @app.route("/edit", methods=["POST", "GET"])
 def edit():
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect("/login")
+
     # POST
     if request.method == "POST":
         
@@ -511,7 +555,11 @@ def edit():
 @login_required
 @app.route("/edited", methods=["POST"])
 def edited():
-    
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect("/login")
+
     # Get all data from form
     if request.method == "POST":
 
@@ -571,6 +619,11 @@ def edited():
 @login_required
 @app.route("/delete", methods=["POST"])
 def delete():
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect("/login")
+
     wimit_delete = request.form.get("delete_btn")
     db.execute("DELETE FROM add_wimit WHERE id = ?", wimit_delete)
     db.execute("DELETE FROM wimit_members WHERE wimit_id = ?", wimit_delete)
@@ -590,6 +643,11 @@ def home_filters():
     init_today()
     filtered = request.args.get("filtered")
     
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect("/login")
+
     # If logged in
     if 'username' in session:
         # Select public and private activities, filtered
@@ -612,10 +670,15 @@ def home_filters():
             if (filtered is None) or (filtered == 'all'):
                 image_link = "static/img/sunrise.jpg"
                 return redirect ("/")
+            elif filtered == 'Others':
+                placeholders = ','.join(['%s' for _ in ACTIVITIES])
+                sql_query = f"SELECT * FROM add_wimit WHERE activity NOT IN ({placeholders})"
+                db.execute(sql_query, ACTIVITIES)
+                
             # If filter selected
             else:
                 image_link = set_image_linkv2(filtered, ACTIVITIES)
-                return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_public_activities=user_public_activities, user_private_activities=user_private_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, image_link=image_link, title='My Wim!ts - ' + filtered)
+                return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_public_activities=user_public_activities, user_private_activities=user_private_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, image_link=image_link, title='Wim!ts - ' + filtered)
 
 
         except (KeyError, IndexError):
@@ -650,6 +713,11 @@ def mywimits_filters():
     init_today()
     filtered = request.args.get("filtered")
     
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect("/login")
+
     if (filtered is None) or (filtered == 'all'):
         # Set image and title
         image_link = "static/img/sunrise.jpg"
@@ -674,6 +742,11 @@ def mywimits_filters():
 @app.route("/friends", methods=["GET"])
 def friends():
     # GET
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect("/login")
+
     image_link = "static/img/friendshiphot.jpg"
     """
     friends_query = 
@@ -707,6 +780,11 @@ def friends():
 @app.route("/search-friend", methods=["POST"])
 def search_friends():
     # POST
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect("/login")
+
     if request.method == "POST":
         friend_username = request.form.get("friends")
 
@@ -715,17 +793,14 @@ def search_friends():
 
             # Check if user tries to find himself
             if friend_data[0]['id'] == session['user_id']:
-                return render_template("error.html", pending=session['pending_friend'], message="You should already be your friend!")
+                return render_template("error.html", pending=session['pending_friends'], message="You should already be your friend!")
         except IndexError:
-            return render_template("error.html", pending=session['pending_friend'], message="Could not find username.")
+            return render_template("error.html", pending=session['pending_friends'], message="Could not find username.")
 
-        # Access data from session["user_id"]
-        usr_data = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])
-        usr_data = usr_data[0]
 
         # Check if user already had sent a friend request. If not, insert into database
         if (db.execute("SELECT * FROM friend_request WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)", session["user_id"], friend_data[0]['id'], friend_data[0]['id'], session["user_id"])):
-            return render_template("error.html", pending=session['pending_friend'], message="You cannot send another friend request to that user.")
+            return render_template("error.html", pending=session['pending_friends'], message="You cannot send another friend request to that user.")
         else:
             db.execute("INSERT INTO friend_request (user1_id, user2_id, status) VALUES (?, ?, 'Pending')", session['user_id'], friend_data[0]['id'])
             
@@ -734,17 +809,20 @@ def search_friends():
             image_link = "static/img/friendshiphot.jpg"
 
             # Check if user has friend requests and/or friends
-            friends = db.execute("SELECT friend_request.id, user1_id, username, status, friends_since FROM friend_request JOIN users ON friend_request.user1_id = users.id WHERE friend_request.user2_id = ?", session['user_id'])
-            friends2 = db.execute("SELECT user2_id, username, status, friends_since FROM friend_request JOIN users ON friend_request.user2_id = users.id WHERE friend_request.user1_id = ?", session['user_id'])
+            friends = db.execute("SELECT * FROM friend_request JOIN users ON users.id = friend_request.user2_id WHERE users.id = ?", session['user_id'])
+            friends2 = db.execute("SELECT * FROM friends JOIN users ON users.id = friends.user_id WHERE users.id = ?", session['user_id'])
+
+            #friends = db.execute("SELECT friend_request.id, user1_id, username, status, friends_since FROM friend_request JOIN users ON friend_request.user1_id = users.id WHERE friend_request.user2_id = ?", session['user_id'])
+            #friends2 = db.execute("SELECT user2_id, username, status, friends_since FROM friend_request JOIN users ON friend_request.user2_id = users.id WHERE friend_request.user1_id = ?", session['user_id'])
             
             if friends and friends2:
-                return render_template("friends.html", pending=session['pending_friend'], friends=friends, friends2=friends2, image_link=image_link)
+                return render_template("friends.html", pending=session['pending_friends'], friends=friends, friends2=friends2, image_link=image_link)
             elif friends:
-                return render_template("friends.html", pending=session['pending_friend'], friends=friends, image_link=image_link)
+                return render_template("friends.html", pending=session['pending_friends'], friends=friends, image_link=image_link)
             elif friends2:
-                return render_template("friends.html", pending=session['pending_friend'], friends2=friends2, image_link=image_link)
+                return render_template("friends.html", pending=session['pending_friends'], friends2=friends2, image_link=image_link)
             else:
-                return render_template("friends.html", pending=session['pending_friend'], image_link=image_link)
+                return render_template("friends.html", pending=session['pending_friends'], image_link=image_link)
             
         except IndexError:
             return redirect("/")
@@ -753,6 +831,11 @@ def search_friends():
 @login_required
 @app.route("/accept-reject", methods=["POST"])
 def accept_reject():
+    try:
+        x = session['user_id']
+    except KeyError:
+        return redirect("/login")
+
     id_a = request.form.get("accept_friend")
     if id_a:
         db.execute("UPDATE friend_request SET status = 'Accepted' WHERE id = ?", id_a)
@@ -761,7 +844,7 @@ def accept_reject():
         friends = friends[0]
         print(friends['user1_id'])
         print(friends['user2_id'])
-        db.execute("INSERT INTO friends (user_id, friend_id) VALUES (?, ?)",  friends['user1_id'], friends['user2_id'])
+        db.execute("INSERT INTO friends (user_id, friend_id) VALUES (?, ?)", friends['user1_id'], friends['user2_id'])
         db.execute("INSERT INTO friends (user_id, friend_id) VALUES (?, ?)", friends['user2_id'], friends['user1_id'])
     else:
         id_r = request.form.get("reject_friend")
