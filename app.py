@@ -580,51 +580,67 @@ def delete():
 @login_required
 @app.route("/home-filters", methods=["GET"])
 def home_filters():
+#---------------
 
+
+
+
+#--------------------
     # Set today
     init_today()
     filtered = request.args.get("filtered")
     
-    # Select public and private activities, filtered
-    try:
-        home_filtered = db.execute("SELECT * FROM add_wimit WHERE n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", today, filtered)
+    # If logged in
+    if 'username' in session:
+        # Select public and private activities, filtered
+        try:
+            # Select private_activities created by user
+            user_private_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'private') AND (creator_id = ?) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
 
-        # Select private_activities created by user
-        user_private_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'private') AND (creator_id = ?) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+            # Select public activities created by user
+            user_public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND (creator_id = ?) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
 
-        # Select public activities created by user
-        user_public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND (creator_id = ?) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+            # Select private activities created by friends
+            friends_private_activities = db.execute("SELECT * FROM add_wimit JOIN friends ON add_wimit.creator_id = friends.friend_id WHERE friends.user_id = ? AND allowed = 'private' AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+            fpa_usernames = db.execute("SELECT * FROM users JOIN friends ON users.id = friends.friend_id JOIN add_wimit ON friends.friend_id = add_wimit.creator_id WHERE friends.user_id = ? AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+            
+            # Select public activities 
+            public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND creator_id != ? AND (n_members < max) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+            pa_usernames = db.execute("SELECT * FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE allowed = 'public' AND creator_id != ? AND n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
 
-        # Select private activities created by friends
-        friends_private_activities = db.execute("SELECT * FROM add_wimit JOIN friends ON add_wimit.creator_id = friends.friend_id WHERE friends.user_id = ? AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
-        fpa_usernames = db.execute("SELECT * FROM users JOIN friends ON users.id = friends.friend_id JOIN add_wimit ON friends.friend_id = add_wimit.creator_id WHERE friends.user_id = ? AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
-        
-        # Select public activities 
-        public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND creator_id != ? AND (n_members < max) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
-        pa_usernames = db.execute("SELECT * FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE allowed = 'public' AND creator_id != ? AND n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
-
-
-# ---------------
-        # If filter selected
-        if (home_filtered):
-            image_link = set_image_link(home_filtered[0], ACTIVITIES)
-            return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_public_activities=user_public_activities, user_private_activities=user_private_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, image_link=image_link, title='My Wim!ts - ' + filtered)
-
-        # If filter = All
-        if (filtered == 'all'):
-            usr_act = db.execute("SELECT * FROM add_wimit WHERE n_members < max AND date >= ?", session["user_id"], today)
-            image_link = "static/img/sunrise.jpg"
-            return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_activities=usr_act, image_link=image_link, title='My Wim!ts - All')
-        else:
-            image_link = set_image_link(home_filtered[0], ACTIVITIES)
-            return render_template("home.html", pending=session['pending_friends'], username=session['user_username'], user_private_activities=user_private_activities, user_public_activities=user_public_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, activities=ACTIVITIES, image_link=image_link)
-# --------------------
-    except (KeyError, IndexError):
-        image_link = set_image_linkv2(filtered, ACTIVITIES)
-        return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, image_link=image_link)
+            # If filter = All or NO filter
+            if (filtered is None) or (filtered == 'all'):
+                image_link = "static/img/sunrise.jpg"
+                return redirect ("/")
+            # If filter selected
+            else:
+                image_link = set_image_linkv2(filtered, ACTIVITIES)
+                return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_public_activities=user_public_activities, user_private_activities=user_private_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, image_link=image_link, title='My Wim!ts - ' + filtered)
 
 
+        except (KeyError, IndexError):
+            image_link = set_image_linkv2(filtered, ACTIVITIES)
+            return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, image_link=image_link)
 
+    # If not logged in
+    else:
+        try:
+            # Select public activities 
+            public_activities = db.execute("SELECT * FROM add_wimit WHERE allowed = 'public' AND n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", today, filtered)
+            pa_usernames = db.execute("SELECT * FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE allowed = 'public' AND n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", today, filtered)
+
+            # If filter = All or NO filter
+            if (filtered is None) or (filtered == 'all'):
+                return redirect ("/")
+            # If filter selected
+            else:
+                image_link = set_image_linkv2(filtered, ACTIVITIES)
+                return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, public_activities=public_activities, pa_usernames=pa_usernames, image_link=image_link, title='My Wim!ts - ' + filtered)
+            
+        except (KeyError, IndexError):
+            image_link = set_image_linkv2(filtered, ACTIVITIES)
+            return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, image_link=image_link)
+#----------------------
 # MY WIM!TS DROPDOWN FILTERS ROUTE
 @login_required
 @app.route("/mywimits-filters", methods=["GET"])
@@ -634,7 +650,7 @@ def mywimits_filters():
     init_today()
     filtered = request.args.get("filtered")
     
-    if filtered is None:
+    if (filtered is None) or (filtered == 'all'):
         # Set image and title
         image_link = "static/img/sunrise.jpg"
         title = 'My Wim!ts2'
@@ -642,11 +658,6 @@ def mywimits_filters():
         # All activities created by session["user_id"]
         usr_act = db.execute("SELECT * FROM add_wimit WHERE creator_id = ? AND date >= ? ORDER BY date, hour_1", session['user_id'], today)
         return render_template("mywimits.html", pending=session['pending_friends'], username=session['user_username'], activities=ACTIVITIES, user_activities=usr_act, image_link=image_link, title=title)
-    
-    elif (filtered == 'all'):
-        usr_act = db.execute("SELECT * FROM add_wimit WHERE creator_id = ? AND date >= ?", session["user_id"], today)
-        image_link = "static/img/sunrise.jpg"
-        return render_template("mywimits.html", pending=session['pending_friends'], username=session['user_username'], activities=ACTIVITIES, user_activities=usr_act, image_link=image_link, title='My Wim!ts - All')
 
     else:
         # Ejecutar la consulta
