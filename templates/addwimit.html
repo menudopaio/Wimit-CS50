@@ -13,6 +13,33 @@
             otrosInput.style.display = 'none';
         }
     }
+<<<<<<< HEAD
+
+    // Obtén el elemento de entrada por su ID
+    var inputElement = document.getElementById('activityValue');
+
+    // Agrega un evento de entrada al campo de texto
+    inputElement.addEventListener('input', function() {
+        // Actualiza el valor del atributo 'value' con el valor actual del campo de texto
+        
+        localStorage.setItem('activityValue', inputElement.value);
+    });
+    // ---------------------
+    // Manejo del envío del formulario (puedes agregar tu lógica aquí)
+    const form = document.getElementById('myForm');
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        // Accede al texto actualizado usando el contenido editable
+        const editableHeader = document.getElementById('editableHeader');
+        const updatedText = editableHeader.textContent;
+        console.log('Texto actualizado:', updatedText);
+        // Aquí puedes agregar la lógica para manejar el envío del formulario
+    });
+
+
+    // --------------------
+=======
+>>>>>>> a985d57e9353f0bf5e49203e91a0ba7d032b955b
     </script>
 {% endblock %}
 {% block title %}Add Wim!t{% endblock %}
@@ -32,7 +59,7 @@
                     <th>Hour 1</th>
                     <th>Hour 2</th>
                     <th>Hour 3</th>
-                    <th>I bring my ball</th>
+                    <th>Edit me</div></th>
                     <th></th>
                 </tr>
             </thead>

@@ -19,4 +19,24 @@
 15. Arreglar testigo de Friends pending.
 16. Globalizar funcion today y añadir datos de session['user_username'], session['friends_pending'].
 17. Arreglado: en /add_wimit se puede poner un min mas alto que un max.
+<<<<<<< HEAD
 18. app.py y friends.html unificar sql queries.
+
+(29/12/23)
+19. Desde Home, 'All' del desplegable no funciona.
+
+20. En home o mywimits, que aparezca el nombre real de la actividad en vez de "Others".
+21. El grafico-pastel no aparece correctamente.
+22. Revisar grafico check_details.html cuando solo hay una hora o dos. Muestra etiquetas de mas.
+23. Asegurar que sin loguear no se puede crear actividades o añadir amigos etc.
+24. Revisar seguridad basica de inputs.
+
+(1/1/24)
+25. Desplegable home lleva a home-filters con titulo de mywimits.
+26. No se guardan correctamente los id de FRIENDS
+27. Verificar si actividades privadas funcionan bien y se displeyean bien en home.
+28. Arreglar all del desplegable MyWimits.
+29. En home.html, if enrolled == True, que aparezca un testigo.
+=======
+18. app.py y friends.html unificar sql queries.
+>>>>>>> a985d57e9353f0bf5e49203e91a0ba7d032b955b
