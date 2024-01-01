@@ -60,7 +60,11 @@
                 {% else %}
                     <tr class="table table-secondary">
                 {% endif %}
-                    <td class="bold"> {{ each["activity"] }} </td>
+                <div class="flex_max">
+                    <td class="bold inline"> {{ each["activity"] }}
+                        <button class="enrolledornot enrolled inline" disabled></button>
+                    </td>
+                </div>
                     <td class="bold"> {{ username }} </td>
                     <td> {{ each["place"] }} </td>
                     <td> {{ each["allowed"] }} </td>

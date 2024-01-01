@@ -5,30 +5,11 @@
     
     function changeFunc() {
         var selectBox = document.getElementById("filtered");
-        var selectedOption = selectBox.options[selectBox.selectedIndex];
+        var selectedValue = selectBox.options[selectBox.selectedIndex].value;
 
-        if (selectedOption == 'Others') {
-            var selectedValue = document.getElementById("activityValue").innerText;
-
-            // Cambia el contenido de la etiqueta con el ID "filtered"
-            var labelElement = document.querySelector('label[for="filtered"]');
-            labelElement.innerText = selectedValue;
-        } else {
-            // Restaura el contenido original de la etiqueta
-            var originalContent = "Filter by: ";
-            var labelElement = document.querySelector('label[for="filtered"]');
-            labelElement.innerText = originalContent;
-
-            var selectedValue = selectedOption.value;
-            window.location.href = '/home-filters?filtered=' + encodeURIComponent(selectedValue);
-        }
+        window.location = '/home-filters?filtered=' + selectedValue;
     }
 
-    // Obtén el valor almacenado en LocalStorage
-    var storedValue = localStorage.getItem('activityValue');
-    
-    // Muestra el valor en el segundo HTML
-    document.getElementById('activityValue').innerText = storedValue;
     
 </script>
 
@@ -87,11 +68,12 @@
                     {% else %}
                         <tr class="table table-secondary">
                     {% endif %}
-                    {% if each['activity'] == 'Others' %}
-                        <td class="bold" id="activityValue"></td>
-                    {% else %}
-                        <td class="bold"> {{ each['activity'] }} </td>
-                    {% endif %}
+                    
+                    <div class="flex_max">
+                        <td class="bold inline"> {{ each['activity'] }} 
+                            <button class="enrolledornot enrolled inline" disabled></button>
+                        </td>
+                    </div>
                         <td class="bold"> {{ username }} </td>
                         <td> {{ each["place"] }} </td>
                         <td> {{ each["allowed"] }} </td>
@@ -123,11 +105,12 @@
                     {% else %}
                         <tr class="table table-secondary">
                     {% endif %}
-                    {% if each['activity'] == 'Others' %}
-                        <td class="bold" id="activityValue"></td>
-                    {% else %}
-                        <td class="bold"> {{ each['activity'] }} </td>
-                    {% endif %}
+                    
+                    <div class="flex_max">
+                        <td class="bold inline"> {{ each['activity'] }}
+                            <button class="enrolledornot enrolled inline" disabled></button>
+                        </td>
+                    </div>
                         <td class="bold"> {{ username }} </td>
                         <td> {{ each["place"] }} </td>
                         <td> {{ each["allowed"] }} </td>
@@ -159,11 +142,11 @@
                     {% else %}
                         <tr class="table table-secondary">
                     {% endif %}
-                    {% if each['activity'] == 'Others' %}
-                        <td class="bold" id="activityValue"></td>
-                    {% else %}
-                        <td class="bold"> {{ each['activity'] }} </td>
-                    {% endif %}
+                        <div class="flex-max">
+                            <td class="bold inline">{{ each['activity'] }}
+                                <button id="result" class="enrolledornot inline" disabled></button>
+                            </td>
+                        </div>
                         <td class="bold"> {{ fpa_usernames[loop.index0]['username'] }} </td>
                         <td> {{ each["place"] }} </td>
                         <td> {{ each["allowed"] }} </td>
@@ -195,11 +178,12 @@
                     {% else %}
                         <tr class="table table-secondary">
                     {% endif %}
-                    {% if each['activity'] == 'Others' %}
-                        <td class="bold" id="activityValue"></td>
-                    {% else %}
-                        <td class="bold"> {{ each['activity'] }} </td>
-                    {% endif %}
+                        <div class="flex_max">
+                            <td class="bold inline"> {{ each['activity'] }}
+                                <button id="result" class="enrolledornot inline" disabled></button>
+                            </td>
+                        </div>
+                    
                         <td class="bold"> {{ pa_usernames[loop.index0]['username'] }} </td>
                         <td> {{ each["place"] }} </td>
                         <td> {{ each["allowed"] }} </td>

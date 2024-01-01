@@ -173,3 +173,33 @@ table .left
     color: rgb(155, 0, 0);
 }
 
+.enrolledornot
+{
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+}
+
+.enrolled
+{
+    background-color: rgb(97, 255, 97);
+}
+
+.not-enrolled
+{
+    background-color: #ffa5a5;
+}
+
+.inline
+{
+    display: inline-block;
+    flex: auto;
+
+}
+
+.flex_max
+{
+    display: flex;
+    max-width: 20%;
+}

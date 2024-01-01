@@ -32,3 +32,10 @@
 22. Revisar grafico check_details.html cuando solo hay una hora o dos. Muestra etiquetas de mas.
 23. Asegurar que sin loguear no se puede crear actividades o añadir amigos etc.
 24. Revisar seguridad basica de inputs.
+
+(1/1/24)
+25. Desplegable home lleva a home-filters con titulo de mywimits.
+26. No se guardan correctamente los id de FRIENDS
+27. Verificar si actividades privadas funcionan bien y se displeyean bien en home.
+28. Arreglar all del desplegable MyWimits.
+29. En home.html, if enrolled == True, que aparezca un testigo.
