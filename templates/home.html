@@ -9,6 +9,8 @@
 
         window.location = '/home-filters?filtered=' + selectedValue;
     }
+
+
     </script>
 {% endblock %}
 
@@ -67,9 +69,15 @@
                     {% endif %}
                     
                     <div class="flex_max">
-                        <td class="bold inline"> {{ each['activity'] }} 
-                            <button class="enrolledornot enrolled inline" disabled></button>
-                        </td>
+                        {% if each['activity'] == 'Others' %}
+                            <td id="otros2" class="bold inline"> {{ each['others_name'] }} 
+                                <button class="enrolledornot enrolled inline" disabled></button>
+                            </td>
+                        {% else %}
+                            <td class="bold inline"> {{ each['activity'] }} 
+                                <button class="enrolledornot enrolled inline" disabled></button>
+                            </td>
+                        {% endif %}
                     </div>
                         <td class="bold"> {{ username }} </td>
                         <td> {{ each["place"] }} </td>
@@ -104,9 +112,15 @@
                     {% endif %}
                     
                     <div class="flex_max">
-                        <td class="bold inline"> {{ each['activity'] }}
-                            <button class="enrolledornot enrolled inline" disabled></button>
-                        </td>
+                        {% if each['activity'] == 'Others' %}
+                            <td id="otros2" class="bold inline"> {{ each['others_name'] }} 
+                                <button class="enrolledornot enrolled inline" disabled></button>
+                            </td>
+                        {% else %}
+                            <td class="bold inline"> {{ each['activity'] }} 
+                                <button class="enrolledornot enrolled inline" disabled></button>
+                            </td>
+                        {% endif %}
                     </div>
                         <td class="bold"> {{ username }} </td>
                         <td> {{ each["place"] }} </td>
@@ -139,11 +153,19 @@
                     {% else %}
                         <tr class="table table-secondary">
                     {% endif %}
-                        <div class="flex-max">
-                            <td class="bold inline">{{ each['activity'] }}
-                                <button id="result" class="enrolledornot inline" disabled></button>
+
+                    <div class="flex_max">
+                        {% if each['activity'] == 'Others' %}
+                            <td id="otros2" class="bold inline"> {{ each['others_name'] }} 
+                                <button class="enrolledornot enrolled inline" disabled></button>
                             </td>
-                        </div>
+                        {% else %}
+                            <td class="bold inline"> {{ each['activity'] }} 
+                                <button class="enrolledornot enrolled inline" disabled></button>
+                            </td>
+                        {% endif %}
+                    </div>
+
                         <td class="bold"> {{ fpa_usernames[loop.index0]['username'] }} </td>
                         <td> {{ each["place"] }} </td>
                         <td> {{ each["allowed"] }} </td>
@@ -175,11 +197,17 @@
                     {% else %}
                         <tr class="table table-secondary">
                     {% endif %}
-                        <div class="flex_max">
-                            <td class="bold inline"> {{ each['activity'] }}
-                                <button id="result" class="enrolledornot inline" disabled></button>
+                    <div class="flex_max">
+                        {% if each['activity'] == 'Others' %}
+                            <td id="otros2" class="bold inline"> {{ each['others_name'] }} 
+                                <button class="enrolledornot enrolled inline" disabled></button>
                             </td>
-                        </div>
+                        {% else %}
+                            <td class="bold inline"> {{ each['activity'] }} 
+                                <button class="enrolledornot enrolled inline" disabled></button>
+                            </td>
+                        {% endif %}
+                    </div>
                     
                         <td class="bold"> {{ pa_usernames[loop.index0]['username'] }} </td>
                         <td> {{ each["place"] }} </td>

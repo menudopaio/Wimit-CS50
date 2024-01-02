@@ -61,9 +61,15 @@
                     <tr class="table table-secondary">
                 {% endif %}
                 <div class="flex_max">
-                    <td class="bold inline"> {{ each["activity"] }}
-                        <button class="enrolledornot enrolled inline" disabled></button>
-                    </td>
+                    {% if each['activity'] == 'Others' %}
+                        <td id="otros2" class="bold inline"> {{ each['others_name'] }} 
+                            <button class="enrolledornot enrolled inline" disabled></button>
+                        </td>
+                    {% else %}
+                        <td class="bold inline"> {{ each['activity'] }} 
+                            <button class="enrolledornot enrolled inline" disabled></button>
+                        </td>
+                    {% endif %}
                 </div>
                     <td class="bold"> {{ username }} </td>
                     <td> {{ each["place"] }} </td>

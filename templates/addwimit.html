@@ -2,7 +2,8 @@
 {% block nav %}<li class="nav-item"><a class="nav-link bold">{{ username }}</a></li>{% endblock %}
 {% block links %}
     <script type="text/javascript">
-
+    
+    // If Others, display input text
     function mostrarInput() {
         var actividadesDropdown = document.getElementById('activity');
         var otrosInput = document.getElementById('otrosInput');
@@ -13,18 +14,17 @@
             otrosInput.style.display = 'none';
         }
     }
-<<<<<<< HEAD
 
-    // Obtén el elemento de entrada por su ID
-    var inputElement = document.getElementById('activityValue');
+    /* // Obtén el elemento de entrada por su ID
+    var inputElement = document.getElementById('otros');
 
     // Agrega un evento de entrada al campo de texto
     inputElement.addEventListener('input', function() {
         // Actualiza el valor del atributo 'value' con el valor actual del campo de texto
         
-        localStorage.setItem('activityValue', inputElement.value);
-    });
-    // ---------------------
+        localStorage.setItem('otros', inputElement.value);
+    }); */
+    /* // ---------------------
     // Manejo del envío del formulario (puedes agregar tu lógica aquí)
     const form = document.getElementById('myForm');
     form.addEventListener('submit', function (event) {
@@ -34,12 +34,10 @@
         const updatedText = editableHeader.textContent;
         console.log('Texto actualizado:', updatedText);
         // Aquí puedes agregar la lógica para manejar el envío del formulario
-    });
+    }); */
 
 
     // --------------------
-=======
->>>>>>> a985d57e9353f0bf5e49203e91a0ba7d032b955b
     </script>
 {% endblock %}
 {% block title %}Add Wim!t{% endblock %}
@@ -65,7 +63,7 @@
             </thead>
 
             <tbody class="table-group-divider">
-                <form action="/addwimit" method="post">
+                <form id="myForm" action="/addwimit" method="post">
                     <tr>
                         <td>
                             <select name="activity" id="activity" onchange="mostrarInput();">

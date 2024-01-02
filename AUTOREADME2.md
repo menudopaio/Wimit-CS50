@@ -1,11 +1,13 @@
 # FIXED:
 
+(26/12/23)
 1. Si filtro, da error y no muestra la pagina.
 2. No aparecen los wimits privados de amigos.
 3. Ordenar actividades por privado- hora, dia, publico- hora, dia.
 4. En friends.html, no mostrar id del user friend.
 5. Configurar redireccion error.html, va siempre a addwimit (no a search-friends, log in..).
 
+(27/12/23)
 6. Cuando le doy a add friend, redirige sin imagen.
 7. Eliminar Guest. Asegurar que sin loguear no se puede crear actividades o añadir amigos.
 8. Si hay algun friends_request status pending, que aparezca algun icono o algo en Friends en la cabecera.
@@ -15,11 +17,11 @@
 12. Cuando hay participantes minimos sumando distintos horarios, no debe ser valido.
 13. Nombre usuario en el nav bar
 
+(28/12/23)
 14. Si se edita un wimit, verificar que se actualiza la base de datos.
 15. Arreglar testigo de Friends pending.
-16. Globalizar funcion today y añadir datos de session['user_username'], session['friends_pending'].
+16. Globalizar funcion today y añadir datos de session(usernames y pending friends)
 17. Arreglado: en /add_wimit se puede poner un min mas alto que un max.
-<<<<<<< HEAD
 18. app.py y friends.html unificar sql queries.
 
 (29/12/23)
@@ -37,6 +39,10 @@
 27. Verificar si actividades privadas funcionan bien y se displeyean bien en home.
 28. Arreglar all del desplegable MyWimits.
 29. En home.html, if enrolled == True, que aparezca un testigo.
-=======
-18. app.py y friends.html unificar sql queries.
->>>>>>> a985d57e9353f0bf5e49203e91a0ba7d032b955b
+
+(2/1/24)
+30. Si actividad = Others, display input text para darle nombre a la actividad.
+31. Si pepe invita a juan como amigo, pepe es amigo de juan, pero juan de pepe no.
+32. Actualizar pending_friends si acepta o rechaza una solicitud de amistad.
+33. Verificar acceso a actividades publicas/privadas si amigos o no.
+34. 
