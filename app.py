@@ -621,7 +621,7 @@ def home_filters():
         if (filtered is None) or (filtered == 'all'):
             image_link = "static/img/sunrise.jpg"
             return redirect("/")
-########
+
         # If filter selected
         else:
             image_link = set_image_linkv2(filtered, ACTIVITIES)
