@@ -337,7 +337,7 @@ def check():
         # Imprimir el código HTML con la imagen base64
         html_code = f'<img src="data:image/png;base64,{imagen_base64}" alt="Gráfico Circular">'
 
-        return render_template("check_details.html", pending=session['friends_pending'], html_code=html_code, image_link=image_link, a=user_wimits, enrolled=True, hr1=pr1, hr2=pr2, hr3=pr3, cur_mem=cur_mem)
+        return render_template("check_details.html", pending=session['pending_friends'], html_code=html_code, image_link=image_link, a=user_wimits, enrolled=True, hr1=pr1, hr2=pr2, hr3=pr3, cur_mem=cur_mem)
 
 
 # ADD WIMIT ROUTE
@@ -357,7 +357,7 @@ def addwimit():
         maxi = request.form.get("max", 50)
         place = request.form.get("place")
         i_bring = request.form.get("i_bring", 0)
-        #updated_text = request.form['updatedText']
+        otros = request.form['otros']
         dates = request.form.get("date")
         hour_1 = request.form.get("time_1")
         hour_2 = request.form.get("time_2")
@@ -390,7 +390,7 @@ def addwimit():
             return render_template("error.html", pending=session['pending_friends'], message="Minimum members must be less than maximum.")
         # Create event in the database
         try:
-            db.execute("INSERT INTO add_wimit (creator_id, activity, allowed, min, max, date, hour_1, hour_2, hour_3, i_bring, n_members, place) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)", session["user_id"], activity, allowed, mini, maxi, dates, hour_1, hour_2, hour_3, i_bring, place)
+            db.execute("INSERT INTO add_wimit (creator_id, activity, allowed, min, max, date, hour_1, hour_2, hour_3, i_bring, n_members, place, others_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)", session["user_id"], activity, allowed, mini, maxi, dates, hour_1, hour_2, hour_3, i_bring, place, otros)
         except KeyError:
             return render_template("login.html")
         
@@ -398,7 +398,7 @@ def addwimit():
         wimit_id = db.execute("SELECT id FROM add_wimit WHERE creator_id = ? and activity = ? AND allowed = ? AND min = ? AND max = ? AND date = ? AND hour_1 = ? AND i_bring = ? AND n_members = 1 AND place = ? ORDER BY id DESC LIMIT 1", session['user_id'], activity, allowed, mini, maxi, dates, hour_1, i_bring, place)
         wimit_id = wimit_id[0]
         
-        # Add creator_id as new member in wimit_members
+        # Check user's preferences
         if hour_2:
             h2on = 'on'
         else:
@@ -407,6 +407,8 @@ def addwimit():
             h3on = 'on'
         else:
             h3on = None
+
+        # Add creator_id as new member in wimit_members
         db.execute("INSERT INTO wimit_members (wimit_id, member_id, date, hour_1, hour_2, hour_3) VALUES (?, ?, ?, 'on', ?, ?)", wimit_id["id"], session["user_id"], dates, h2on, h3on)
         return redirect("/")
     # GET
@@ -593,76 +595,59 @@ def home_filters():
     filtered = request.args.get("filtered")
     
     # If logged in
-    if 'username' in session:
-        # Select public and private activities, filtered
-        try:
-            # Select private_activities created by user
-            user_private_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'private') AND (creator_id = ?) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
-            print(len(user_private_activities))
-            # Select public activities created by user
-            user_public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND (creator_id = ?) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+    #if 'username' in session:
+    try:
+        x = session['user_id']
+    except:
+        return redirect("/login")
+    
+    # Select public and private activities, filtered
+    try:
+        # Select private_activities created by user
+        user_private_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'private') AND (creator_id = ?) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
 
-            # Select private activities created by friends
-            friends_private_activities = db.execute("SELECT * FROM add_wimit JOIN friends ON add_wimit.creator_id = friends.friend_id WHERE friends.user_id = ? AND allowed = 'private' AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
-            fpa_usernames = db.execute("SELECT * FROM users JOIN friends ON users.id = friends.friend_id JOIN add_wimit ON friends.friend_id = add_wimit.creator_id WHERE friends.user_id = ? AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
-            
-            # Select public activities 
-            public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND creator_id != ? AND (n_members < max) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
-            pa_usernames = db.execute("SELECT * FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE allowed = 'public' AND creator_id != ? AND n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+        # Select public activities created by user
+        user_public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND (creator_id = ?) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
 
-            # If filter = All or NO filter
-            if (filtered is None) or (filtered == 'all'):
-                image_link = "static/img/sunrise.jpg"
-                return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_private_activities=user_private_activities, user_public_activities=user_private_activities, friends_private_activities=friends_private_activities, public_activities=public_activities, fpa_usernames=fpa_usernames, pa_usernames=pa_usernames, image_link=image_link)
-            elif (filtered == 'Others'):
-                image_link = set_image_linkv2(filtered, ACTIVITIES)
-                
-                # Consulta SQL usando placeholders (?) para los valores de ACTIVITIES
-                query = "SELECT * FROM add_wimit WHERE activity NOT IN ({}) ORDER BY date, hour_1".format(', '.join(['"{}"'.format(a) for a in ACTIVITIES]))
-                usernames = "SELECT username FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE activity NOT IN ({}) ORDER BY date, hour_1".format(', '.join(['"{}"'.format(a) for a in ACTIVITIES]))
-                # Ejecutar la consulta con los valores de ACTIVITIES
-                namesOthers = db.execute(query)
-                return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_activities=namesOthers, usernames=usernames, image_link=image_link, title='My Wim!ts - ' + filtered)
-                   
-            # If filter selected
-            else:
-                image_link = set_image_linkv2(filtered, ACTIVITIES)
-                return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_public_activities=user_public_activities, user_private_activities=user_private_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, image_link=image_link, title='My Wim!ts - ' + filtered)
+        # Select private activities created by friends
+        friends_private_activities = db.execute("SELECT * FROM add_wimit JOIN friends ON add_wimit.creator_id = friends.friend_id WHERE friends.user_id = ? AND allowed = 'private' AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+        fpa_usernames = db.execute("SELECT * FROM users JOIN friends ON users.id = friends.friend_id JOIN add_wimit ON friends.friend_id = add_wimit.creator_id WHERE friends.user_id = ? AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+        
+        # Select public activities 
+        public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND creator_id != ? AND (n_members < max) AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
+        pa_usernames = db.execute("SELECT * FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE allowed = 'public' AND creator_id != ? AND n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", session["user_id"], today, filtered)
 
+        # If filter = All or NO filter
+        if (filtered is None) or (filtered == 'all'):
+            image_link = "static/img/sunrise.jpg"
+            return redirect("/")
 
-        except (KeyError, IndexError):
+        elif (filtered == 'Others'):
             image_link = set_image_linkv2(filtered, ACTIVITIES)
-            return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, image_link=image_link)
-
-    # If not logged in
-    else:
-        try:
-            # Select public activities 
-            public_activities = db.execute("SELECT * FROM add_wimit WHERE allowed = 'public' AND n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", today, filtered)
-            pa_usernames = db.execute("SELECT * FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE allowed = 'public' AND n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", today, filtered)
-
-            # If filter = All or NO filter
-            if (filtered is None) or (filtered == 'all'):
-                return redirect ("/")
-            elif (filtered == 'Others'):
-                image_link = set_image_linkv2(filtered, ACTIVITIES)
-                
-                # Consulta SQL usando placeholders (?) para los valores de ACTIVITIES
-                query = "SELECT * FROM add_wimit WHERE activity NOT IN ({}) ORDER BY date, hour_1".format(', '.join(['"{}"'.format(a) for a in ACTIVITIES]))
-                usernames = "SELECT username FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE activity NOT IN ({}) ORDER BY date, hour_1".format(', '.join(['"{}"'.format(a) for a in ACTIVITIES]))
-                # Ejecutar la consulta con los valores de ACTIVITIES
-                namesOthers = db.execute(query)
-                return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_activities=namesOthers, usernames=usernames, image_link=image_link, title='My Wim!ts - ' + filtered)
-                    
-            # If filter selected
-            else:
-                image_link = set_image_linkv2(filtered, ACTIVITIES)
-                return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, public_activities=public_activities, pa_usernames=pa_usernames, image_link=image_link, title='Wim!ts - ' + filtered)
             
-        except (KeyError, IndexError):
+            # Consulta SQL usando placeholders (?) para los valores de ACTIVITIES
+            acts = db.execute("SELECT * FROM add_wimit WHERE activity = 'Others' ORDER BY date, hour_1")
+            usernames = db.execute("SELECT username FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE activity = 'Others' ORDER BY date, hour_1")
+
+            return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, public_activities=acts, pa_usernames=usernames, image_link=image_link, title='Wim!ts - ' + filtered)
+                
+        # If filter selected
+        else:
             image_link = set_image_linkv2(filtered, ACTIVITIES)
-            return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, image_link=image_link)
-#----------------------
+            return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_public_activities=user_public_activities, user_private_activities=user_private_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, image_link=image_link, title='My Wim!ts - ' + filtered)
+
+    # AQUI ESTAN TODOS FALLOS DE HOME
+    except (KeyError, IndexError):
+        image_link = set_image_linkv2(filtered, ACTIVITIES)
+
+        # Select public activities 
+        public_activities = db.execute("SELECT * FROM add_wimit WHERE (allowed = 'public') AND (n_members < max) AND date >= ? AND activity = ? ORDER BY date, hour_1", today, filtered)
+        pa_usernames = db.execute("SELECT * FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE allowed = 'public' AND n_members < max AND date >= ? AND activity = ? ORDER BY date, hour_1", today, filtered)
+
+        return render_template("home.html", pending=session['pending_friends'], public_activities=public_activities, pa_usernames=pa_usernames, activities=ACTIVITIES, image_link=image_link)
+
+
+    
 # MY WIM!TS DROPDOWN FILTERS ROUTE
 @login_required
 @app.route("/mywimits-filters", methods=["GET"])
@@ -684,13 +669,12 @@ def mywimits_filters():
     elif (filtered == 'Others'):
         image_link = set_image_linkv2(filtered, ACTIVITIES)
         
-        # Consulta SQL usando placeholders (?) para los valores de ACTIVITIES
-        query = "SELECT * FROM add_wimit WHERE activity NOT IN ({}) AND creator_id = ?".format(', '.join(['"{}"'.format(a) for a in ACTIVITIES]))
 
-        # Ejecutar la consulta con los valores de ACTIVITIES
-        namesOthers = db.execute(query, session['user_id'])
-        return render_template("mywimits.html", pending=session['pending_friends'], activities=ACTIVITIES, user_activities=namesOthers, username=session['user_username'], image_link=image_link, title='My Wim!ts - ' + filtered)
-            
+        # Consulta SQL usando placeholders (?) para los valores de ACTIVITIES
+        acts = db.execute("SELECT * FROM add_wimit WHERE activity = 'Others' AND creator_id = ? ORDER BY date, hour_1", session['user_id'])
+        
+        return render_template("mywimits.html", pending=session['pending_friends'], activities=ACTIVITIES, user_activities=acts, username=session['user_username'], image_link=image_link, title='My Wim!ts - ' + filtered)
+                
     else:
         # Ejecutar la consulta
         my_filtered = db.execute("SELECT * FROM add_wimit WHERE creator_id = ? AND date >= ? AND activity = ? ORDER BY date, hour_1", session['user_id'], today, filtered) 
