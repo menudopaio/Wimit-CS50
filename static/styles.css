@@ -167,7 +167,6 @@ table .left
 .rejectedF
 {
     color: rgb(155, 0, 0);
-<<<<<<< HEAD
 }
 
 .enrolledornot
@@ -199,6 +198,4 @@ table .left
 {
     display: flex;
     max-width: 20%;
-=======
->>>>>>> a985d57e9353f0bf5e49203e91a0ba7d032b955b
 }

@@ -613,7 +613,6 @@ def home_filters():
             # If filter = All or NO filter
             if (filtered is None) or (filtered == 'all'):
                 image_link = "static/img/sunrise.jpg"
-<<<<<<< HEAD
                 return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_private_activities=user_private_activities, user_public_activities=user_private_activities, friends_private_activities=friends_private_activities, public_activities=public_activities, fpa_usernames=fpa_usernames, pa_usernames=pa_usernames, image_link=image_link)
             elif (filtered == 'Others'):
                 image_link = set_image_linkv2(filtered, ACTIVITIES)
@@ -625,9 +624,6 @@ def home_filters():
                 namesOthers = db.execute(query)
                 return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_activities=namesOthers, usernames=usernames, image_link=image_link, title='My Wim!ts - ' + filtered)
                    
-=======
-                return redirect ("/")
->>>>>>> a985d57e9353f0bf5e49203e91a0ba7d032b955b
             # If filter selected
             else:
                 image_link = set_image_linkv2(filtered, ACTIVITIES)
@@ -761,7 +757,7 @@ def search_friends():
 
         # Check if user already had sent a friend request. If not, insert into database
         if (db.execute("SELECT * FROM friend_request WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)", session["user_id"], friend_data[0]['id'], friend_data[0]['id'], session["user_id"])):
-            return render_template("error.html", pending=session['pending_friend'], message="You cannot send another friend request to that user.")
+            return render_template("error.html", pending=session['pending_friends'], message="You cannot send another friend request to that user.")
         else:
             db.execute("INSERT INTO friend_request (user1_id, user2_id, status) VALUES (?, ?, 'Pending')", session['user_id'], friend_data[0]['id'])
             
@@ -774,13 +770,13 @@ def search_friends():
             friends2 = db.execute("SELECT user2_id, username, status, friends_since FROM friend_request JOIN users ON friend_request.user2_id = users.id WHERE friend_request.user1_id = ?", session['user_id'])
             
             if friends and friends2:
-                return render_template("friends.html", pending=session['pending_friend'], friends=friends, friends2=friends2, image_link=image_link)
+                return render_template("friends.html", pending=session['pending_friends'], friends=friends, friends2=friends2, image_link=image_link)
             elif friends:
-                return render_template("friends.html", pending=session['pending_friend'], friends=friends, image_link=image_link)
+                return render_template("friends.html", pending=session['pending_friends'], friends=friends, image_link=image_link)
             elif friends2:
-                return render_template("friends.html", pending=session['pending_friend'], friends2=friends2, image_link=image_link)
+                return render_template("friends.html", pending=session['pending_friends'], friends2=friends2, image_link=image_link)
             else:
-                return render_template("friends.html", pending=session['pending_friend'], image_link=image_link)
+                return render_template("friends.html", pending=session['pending_friends'], image_link=image_link)
             
         except IndexError:
             return redirect("/")
@@ -795,12 +791,16 @@ def accept_reject():
         
         friends = db.execute("SELECT user1_id, user2_id FROM friend_request WHERE id = ?", id_a)
         friends = friends[0]
-        print(friends['user1_id'])
-        print(friends['user2_id'])
-        db.execute("INSERT INTO friends (user_id, friend_id) VALUES (?, ?)",  friends['user1_id'], friends['user2_id'])
+        if (friends['user1_id'] != session['user_id'] and friends['user2_id'] != session['user_id']):
+            return render_template("error.html", pending=session['pending_friends'], message="Error adding friend.")
+        
+        db.execute("INSERT INTO friends (user_id, friend_id) VALUES (?, ?)", friends['user1_id'], friends['user2_id'])
         db.execute("INSERT INTO friends (user_id, friend_id) VALUES (?, ?)", friends['user2_id'], friends['user1_id'])
     else:
         id_r = request.form.get("reject_friend")
         db.execute("UPDATE friend_request SET status = 'Rejected' WHERE id = ?", id_r)
+
+    # Pending friends
+    session['pending_friends'] = check_notifications()
 
     return redirect("/friends")
