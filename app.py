@@ -621,20 +621,11 @@ def home_filters():
         if (filtered is None) or (filtered == 'all'):
             image_link = "static/img/sunrise.jpg"
             return redirect("/")
-
-        elif (filtered == 'Others'):
-            image_link = set_image_linkv2(filtered, ACTIVITIES)
-            
-            # Consulta SQL usando placeholders (?) para los valores de ACTIVITIES
-            acts = db.execute("SELECT * FROM add_wimit WHERE activity = 'Others' ORDER BY date, hour_1")
-            usernames = db.execute("SELECT username FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE activity = 'Others' ORDER BY date, hour_1")
-
-            return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, public_activities=acts, pa_usernames=usernames, image_link=image_link, title='Wim!ts - ' + filtered)
-                
+########
         # If filter selected
         else:
             image_link = set_image_linkv2(filtered, ACTIVITIES)
-            return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, user_public_activities=user_public_activities, user_private_activities=user_private_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, image_link=image_link, title='My Wim!ts - ' + filtered)
+            return render_template("home.html", pending=session['pending_friends'], username=session['user_username'], activities=ACTIVITIES, user_public_activities=user_public_activities, user_private_activities=user_private_activities, friends_private_activities=friends_private_activities, fpa_usernames=fpa_usernames, public_activities=public_activities, pa_usernames=pa_usernames, image_link=image_link, title='Wim!ts - ' + filtered)
 
     # AQUI ESTAN TODOS FALLOS DE HOME
     except (KeyError, IndexError):

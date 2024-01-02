@@ -46,3 +46,18 @@
 32. Actualizar pending_friends si acepta o rechaza una solicitud de amistad.
 33. Verificar acceso a actividades publicas/privadas si amigos o no.
 34. 
+
+
+
+
+######
+
+        elif (filtered == 'Others'):
+            image_link = set_image_linkv2(filtered, ACTIVITIES)
+            
+            # Consulta SQL usando placeholders (?) para los valores de ACTIVITIES
+            acts = db.execute("SELECT * FROM add_wimit WHERE activity = 'Others' ORDER BY date, hour_1")
+            usernames = db.execute("SELECT username FROM users JOIN add_wimit ON users.id = add_wimit.creator_id WHERE activity = 'Others' ORDER BY date, hour_1")
+
+            return render_template("home.html", pending=session['pending_friends'], activities=ACTIVITIES, public_activities=acts, pa_usernames=usernames, image_link=image_link, title='Wim!ts - ' + filtered)
+                
