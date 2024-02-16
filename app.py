@@ -779,3 +779,4 @@ def accept_reject():
     session['pending_friends'] = check_notifications()
 
     return redirect("/friends")
+
